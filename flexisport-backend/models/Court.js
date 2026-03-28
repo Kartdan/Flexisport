@@ -1,10 +1,9 @@
-// models/Court.js
 const mongoose = require("mongoose");
 
 const courtSchema = new mongoose.Schema({
   author: { 
     type: mongoose.Schema.Types.ObjectId, 
-    ref: "User",   // ✅ Link to User model
+    ref: "User",
     required: true 
   },
 

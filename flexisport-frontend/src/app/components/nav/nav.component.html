@@ -1,0 +1,14 @@
+<nav class="navbar">
+  <div class="nav-logo">
+    <h1>FlexiSport</h1>
+  </div>
+  <ul class="nav-links">
+    <li><a href="javascript:void(0)">Home</a></li>
+    <li><a href="javascript:void(0)">Courts</a></li>
+    <li><a href="javascript:void(0)">My Bookings</a></li>
+    <li><a href="javascript:void(0)">Profile</a></li>
+  </ul>
+  <div class="nav-auth" *ngIf="isLoggedIn">
+    <button class="logout-btn" (click)="onLogout()">Logout</button>
+  </div>
+</nav>

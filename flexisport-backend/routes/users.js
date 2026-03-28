@@ -3,10 +3,9 @@ const User = require("../models/User");
 
 const router = express.Router();
 
-// GET all users
 router.get("/", async (req, res) => {
   try {
-    const users = await User.find({}, { password: 0 }); // exclude passwords
+    const users = await User.find({}, { password: 0 });
     res.json(users);
   } catch (err) {
     console.error("❌ Error fetching users:", err);

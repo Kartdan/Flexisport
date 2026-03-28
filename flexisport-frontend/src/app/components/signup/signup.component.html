@@ -1,0 +1,47 @@
+<div class="auth-container">
+  <div class="auth-card">
+    
+    <h2>Create FlexiSport Account</h2>
+
+    <form [formGroup]="signupForm" (ngSubmit)="onSignup()">
+      
+      <div class="form-group">
+        <label>Full Name</label>
+        <input type="text" formControlName="fullName" placeholder="Enter your full name">
+      </div>
+
+      <div class="form-group">
+        <label>Username</label>
+        <input type="text" formControlName="username" placeholder="Choose a username">
+      </div>
+
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" formControlName="email" placeholder="email@example.com">
+      </div>
+
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" formControlName="password" placeholder="Min. 6 characters">
+      </div>
+
+      <div class="form-group">
+        <label>Register as:</label>
+        <select formControlName="role">
+          <option *ngFor="let role of roles" [value]="role">
+            {{ role | titlecase }}
+          </option>
+        </select>
+      </div>
+
+      <button type="submit" class="submit-btn" [disabled]="signupForm.invalid">
+        Register Now
+      </button>
+    </form>
+
+    <p class="footer-text">
+      Already have an account? <a routerLink="/login">Login here</a>
+    </p>
+
+  </div>
+</div>

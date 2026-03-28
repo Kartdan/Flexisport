@@ -1,35 +1,40 @@
 const express = require("express");
+const router = express.Router();
 const User = require("../models/User");
 
-const router = express.Router();
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
 
-// SIGNUP route
-router.post("/signup", async (req, res) => {
+router.post("/login", async (req, res) => {
   try {
-    const { fullName, username, email, password } = req.body;  // 👈 include fullName
+    const { email, password } = req.body;
 
-    // Check if user already exists
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({ error: "User already exists" });
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ error: "User not found" });
     }
 
-    // Create new user
-    const newUser = new User({ fullName, username, email, password });
-    const savedUser = await newUser.save();
+    if (user.password !== password) {
+      return res.status(400).json({ error: "Invalid credentials" });
+    }
+
+    const token = jwt.sign(
+      { id: user._id, role: user.role },
+      process.env.JWT_SECRET || "secret_cheie_temporara",
+      { expiresIn: "1d" }
+    );
 
     res.json({
-      message: "✅ User registered successfully",
+      token,
       user: {
-        id: savedUser._id,
-        fullName: savedUser.fullName,   // 👈 return full name
-        username: savedUser.username,
-        email: savedUser.email,
+        id: user._id,
+        fullName: user.fullName,
+        email: user.email,
+        role: user.role
       }
     });
   } catch (err) {
-    console.error("❌ Error signing up:", err);
-    res.status(500).json({ error: "Failed to sign up" });
+    res.status(500).json({ error: "Server error during login" });
   }
 });
 

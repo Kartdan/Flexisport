@@ -1,0 +1,105 @@
+.auth-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  padding: 15px;
+  box-sizing: border-box;
+
+  .auth-card {
+    background: #ffffff;
+    padding: 1.5rem 2rem;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px;
+    box-sizing: border-box;
+
+    h2 {
+      text-align: center;
+      color: #333;
+      margin-top: 0;
+      margin-bottom: 1rem;
+      font-size: 1.2rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    form {
+      display: block;
+      width: 100%;
+
+      .form-group {
+        margin-bottom: 0.8rem;
+        width: 100%;
+        box-sizing: border-box;
+
+        label {
+          display: block;
+          margin-bottom: 0.3rem;
+          font-weight: 600;
+          color: #555;
+          font-size: 0.85rem;
+        }
+
+        input, select {
+          width: 100%;
+          padding: 10px 12px;
+          border: 2px solid #e1e1e1;
+          border-radius: 6px;
+          font-size: 0.95rem;
+          box-sizing: border-box;
+          transition: all 0.2s ease;
+
+          &:focus {
+            outline: none;
+            border-color: #007bff;
+            background-color: #fff;
+          }
+        }
+      }
+
+      .submit-btn {
+        width: 100%;
+        padding: 12px;
+        background-color: #28a745;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        margin-top: 0.5rem;
+        transition: background 0.3s;
+
+        &:hover {
+          background-color: #218838;
+        }
+
+        &:disabled {
+          background-color: #ccc;
+          cursor: not-allowed;
+        }
+      }
+    }
+
+    .footer-text {
+      text-align: center;
+      margin-top: 1rem;
+      margin-bottom: 0;
+      font-size: 0.85rem;
+      color: #666;
+
+      a {
+        color: #007bff;
+        text-decoration: none;
+        font-weight: 600;
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+    }
+  }
+}

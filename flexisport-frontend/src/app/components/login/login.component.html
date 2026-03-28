@@ -1,0 +1,18 @@
+<div class="login-container">
+  <h2>FlexiSport Login</h2>
+  <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+    <div class="form-group">
+      <label for="email">Email Address</label>
+      <input type="email" id="email" formControlName="email" placeholder="enter your email">
+    </div>
+    
+    <div class="form-group">
+      <label for="password">Password</label>
+      <input type="password" id="password" formControlName="password" placeholder="enter your password">
+    </div>
+    
+    <button type="submit" [disabled]="loginForm.invalid">Sign In</button>
+  </form>
+  
+  <p class="footer-text">Don't have an account? <a routerLink="/signup">Register here</a></p>
+</div>
