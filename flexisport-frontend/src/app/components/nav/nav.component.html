@@ -4,9 +4,13 @@
   </div>
   <ul class="nav-links">
     <li><a href="javascript:void(0)">Home</a></li>
+    <li><a routerLink="/feed">Feed</a></li>
     <li><a href="javascript:void(0)">Courts</a></li>
     <li><a href="javascript:void(0)">My Bookings</a></li>
     <li><a href="javascript:void(0)">Profile</a></li>
+    <li *ngIf="isAdmin"><a routerLink="/admin/supervisors">Supervisors</a></li>
+    <li *ngIf="isAdmin"><a routerLink="/admin/courts">Court Approvals</a></li>
+    <li *ngIf="isOwner"><a routerLink="/my-courts">My Courts</a></li>
   </ul>
   <div class="nav-auth" *ngIf="isLoggedIn">
     <button class="logout-btn" (click)="onLogout()">Logout</button>

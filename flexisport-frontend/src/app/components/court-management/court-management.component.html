@@ -1,0 +1,173 @@
+<div class="court-management">
+  <div class="header">
+    <h2>My Courts</h2>
+    <button class="btn btn-primary" (click)="openNewForm()" *ngIf="!showForm">+ Add Court</button>
+  </div>
+
+  <app-post-dialog
+    [visible]="showPostDialog"
+    [defaultTitle]="postDialogTitle"
+    [defaultContent]="postDialogContent"
+    (confirmed)="onPostDialogConfirmed($event)"
+    (cancelled)="onPostDialogCancelled()">
+  </app-post-dialog>
+
+  <div *ngIf="successMessage" class="alert alert-success">{{ successMessage }}</div>
+  <div *ngIf="errorMessage" class="alert alert-error">{{ errorMessage }}</div>
+
+  <!-- Court Form -->
+  <div class="court-form" *ngIf="showForm">
+    <h3>{{ editingCourt ? 'Edit Court' : 'New Court' }}</h3>
+    <form [formGroup]="courtForm" (ngSubmit)="saveCourt()">
+
+      <div class="form-group">
+        <label for="name">Court Name *</label>
+        <input id="name" type="text" formControlName="name" placeholder="e.g. Arena Sport Center">
+      </div>
+
+      <div class="form-group">
+        <label>Sport Categories *</label>
+        <div class="checkbox-group">
+          <label *ngFor="let sport of sports" class="checkbox-label">
+            <input type="checkbox"
+              [checked]="courtForm.value.sportCategories.includes(sport.slug)"
+              (change)="onSportToggle(sport.slug, $event)">
+            {{ sport.emoji }} {{ sport.name }}
+          </label>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="numberOfCourts">Number of Courts *</label>
+          <input id="numberOfCourts" type="number" formControlName="numberOfCourts" min="1">
+        </div>
+        <div class="form-group">
+          <label for="pricePerHour">Price per Hour (RON) *</label>
+          <input id="pricePerHour" type="number" formControlName="pricePerHour" min="0">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="address">Address *</label>
+        <input id="address" type="text" formControlName="address" placeholder="Full address">
+      </div>
+
+      <div class="form-group">
+        <label for="phone">Phone</label>
+        <input id="phone" type="tel" formControlName="phone" placeholder="+40 7XX XXX XXX">
+      </div>
+
+      <div class="form-group">
+        <label for="description">Description / Comments</label>
+        <textarea id="description" formControlName="description" rows="3" placeholder="Additional details about your court..."></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="surfaceType">Surface Type</label>
+        <select id="surfaceType" formControlName="surfaceType">
+          <option *ngFor="let s of surfaceTypes" [value]="s">{{ s | titlecase }}</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="operationalStatus">Operational Status</label>
+        <select id="operationalStatus" formControlName="operationalStatus">
+          <option *ngFor="let s of operationalStatuses" [value]="s.value">{{ s.label }}</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Facilities</label>
+        <div class="checkbox-group">
+          <label *ngFor="let f of facilityOptions" class="checkbox-label">
+            <input type="checkbox"
+              [checked]="courtForm.value.facilities.includes(f)"
+              (change)="onFacilityToggle(f, $event)">
+            {{ formatFacility(f) }}
+          </label>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="scheduleStart">Opens At</label>
+          <input id="scheduleStart" type="time" formControlName="scheduleStart">
+        </div>
+        <div class="form-group">
+          <label for="scheduleEnd">Closes At</label>
+          <input id="scheduleEnd" type="time" formControlName="scheduleEnd">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Photos (max 10, up to 5 MB each)</label>
+
+        <!-- Existing photos (edit mode) -->
+        <div *ngIf="existingPhotos.length" class="existing-photos">
+          <p class="existing-photos-label">Current photos:</p>
+          <div class="existing-photos-grid">
+            <div class="existing-photo-item" *ngFor="let photo of existingPhotos">
+              <img [src]="photo" alt="Court photo" class="existing-photo-thumb">
+              <button type="button" class="btn-remove-existing" (click)="removeExistingPhoto(photo)" [disabled]="removingPhoto" title="Remove photo">✕</button>
+            </div>
+          </div>
+        </div>
+
+        <label for="photos" class="file-input-label">+ Add new photos</label>
+        <input id="photos" type="file" accept="image/jpeg,image/png,image/webp" multiple (change)="onPhotosSelected($event)">
+        <span class="photo-hint">Recommended: 1280 × 720 px (16:9), JPEG. Minimum 800 × 450 px for best display quality.</span>
+        <div *ngIf="selectedPhotos.length" class="selected-photos-list">
+          <div class="selected-photo-item" *ngFor="let photo of selectedPhotos; let i = index">
+            <span class="photo-name">{{ photo.name }}</span>
+            <span class="photo-size">({{ (photo.size / 1024).toFixed(0) }} KB)</span>
+            <button type="button" class="btn-remove-photo" (click)="removeSelectedPhoto(i)" title="Remove">✕</button>
+          </div>
+          <span class="photo-count">{{ selectedPhotos.length }} / 10 queued to upload</span>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary" [disabled]="courtForm.invalid">Save</button>
+        <button type="button" class="btn btn-secondary" (click)="cancelForm()">Cancel</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Courts List -->
+  <div class="courts-list" *ngIf="!showForm">
+    <div *ngIf="courts.length === 0 && !errorMessage" class="empty-state">
+      You haven't added any courts yet. Click "+ Add Court" to get started.
+    </div>
+
+    <div class="court-card" *ngFor="let court of courts">
+      <div class="court-card-header">
+        <h3>{{ court.name }}</h3>
+        <span [class]="'status-badge status-' + court.status">{{ court.status }}</span>
+        <div class="court-actions">
+          <button class="btn btn-sm btn-edit" (click)="editCourt(court)">Edit</button>
+          <button class="btn btn-sm btn-delete" (click)="deleteCourt(court)">Delete</button>
+        </div>
+      </div>
+      <div class="court-card-body">
+        <p><strong>Address:</strong> {{ court.address }}</p>
+        <p><strong>Sports:</strong> {{ court.sportCategories.join(', ') }}</p>
+        <p><strong>Courts:</strong> {{ court.numberOfCourts }}</p>
+        <p><strong>Price:</strong> {{ court.pricePerHour }} RON/h</p>
+        <p><strong>Surface:</strong> {{ court.surfaceType | titlecase }}</p>
+        <p>
+          <strong>Operational Status:</strong>
+          <span [class]="'op-status-badge op-status-' + court.operationalStatus">
+            {{ court.operationalStatus | titlecase }}
+          </span>
+        </p>
+        <p *ngIf="court.phone"><strong>Phone:</strong> {{ court.phone }}</p>
+        <p *ngIf="court.description"><strong>Description:</strong> {{ court.description }}</p>
+        <p *ngIf="court.facilities.length"><strong>Facilities:</strong> {{ court.facilities.join(', ') }}</p>
+        <div *ngIf="court.photos.length" class="court-photos">
+          <img *ngFor="let photo of court.photos" [src]="photo" alt="Court photo" class="court-photo-thumb">
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

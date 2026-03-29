@@ -1,0 +1,54 @@
+<div class="supervisor-management">
+  <h2>Supervisor Management</h2>
+
+  <div *ngIf="successMessage" class="alert alert-success">{{ successMessage }}</div>
+  <div *ngIf="errorMessage" class="alert alert-error">{{ errorMessage }}</div>
+
+  <div *ngIf="supervisors.length === 0 && !errorMessage" class="empty-state">
+    No supervisors registered yet.
+  </div>
+
+  <table *ngIf="supervisors.length > 0" class="supervisors-table">
+    <thead>
+      <tr>
+        <th>Full Name</th>
+        <th>Username</th>
+        <th>Email</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let supervisor of supervisors">
+        <td>{{ supervisor.fullName }}</td>
+        <td>{{ supervisor.username }}</td>
+        <td>{{ supervisor.email }}</td>
+        <td>
+          <span [class]="'status-badge status-' + supervisor.supervisorStatus">
+            {{ supervisor.supervisorStatus }}
+          </span>
+        </td>
+        <td class="actions">
+          <button
+            class="btn btn-accept"
+            [disabled]="supervisor.supervisorStatus === SupervisorStatus.ACCEPTED"
+            (click)="updateStatus(supervisor, SupervisorStatus.ACCEPTED)">
+            Accept
+          </button>
+          <button
+            class="btn btn-reject"
+            [disabled]="supervisor.supervisorStatus === SupervisorStatus.REJECTED"
+            (click)="updateStatus(supervisor, SupervisorStatus.REJECTED)">
+            Reject
+          </button>
+          <button
+            class="btn btn-pending"
+            [disabled]="supervisor.supervisorStatus === SupervisorStatus.PENDING"
+            (click)="updateStatus(supervisor, SupervisorStatus.PENDING)">
+            Set Pending
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

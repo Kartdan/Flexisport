@@ -5,6 +5,38 @@ const User = require("../models/User");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 
+router.post("/register", async (req, res) => {
+  try {
+    const { fullName, username, email, password, role } = req.body;
+
+    const existingUser = await User.findOne({ $or: [{ email }, { username }] });
+    if (existingUser) {
+      return res.status(400).json({ error: "Email or username already in use" });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const userData = {
+      fullName,
+      username,
+      email,
+      password: hashedPassword,
+      role: role || 'player'
+    };
+
+    if (role === 'supervisor') {
+      userData.supervisorStatus = 'pending';
+    }
+
+    const user = new User(userData);
+    await user.save();
+
+    res.status(201).json({ message: "Registration successful" });
+  } catch (err) {
+    res.status(500).json({ error: "Server error during registration" });
+  }
+});
+
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -14,8 +46,18 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ error: "User not found" });
     }
 
-    if (user.password !== password) {
+    const passwordMatch = await bcrypt.compare(password, user.password);
+    if (!passwordMatch) {
       return res.status(400).json({ error: "Invalid credentials" });
+    }
+
+    if (user.role === 'supervisor') {
+      if (user.supervisorStatus === 'pending') {
+        return res.status(403).json({ error: "Your account is pending approval by an administrator." });
+      }
+      if (user.supervisorStatus === 'rejected') {
+        return res.status(403).json({ error: "Your account has been rejected by an administrator." });
+      }
     }
 
     const token = jwt.sign(

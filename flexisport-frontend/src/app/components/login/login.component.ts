@@ -12,6 +12,9 @@ import { Router } from '@angular/router';
 })
 export class LoginComponent {
   loginForm: FormGroup;
+  errorMessage = '';
+  supervisorPending = false;
+  supervisorRejected = false;
 
   constructor(private fb: FormBuilder, private authService: AuthService, private router: Router) {
     this.loginForm = this.fb.group({
@@ -22,12 +25,23 @@ export class LoginComponent {
 
   onSubmit() {
     if (this.loginForm.valid) {
+      this.errorMessage = '';
+      this.supervisorPending = false;
+      this.supervisorRejected = false;
       this.authService.login(this.loginForm.value).subscribe({
-        next: (res) => {
-          console.log('Succesful login!', res);
+        next: () => {
           this.router.navigate(['/home']);
         },
-        error: (err) => console.error('Login error:', err)
+        error: (err) => {
+          const msg: string = err.error?.error || '';
+          if (msg.includes('pending')) {
+            this.supervisorPending = true;
+          } else if (msg.includes('rejected')) {
+            this.supervisorRejected = true;
+          } else {
+            this.errorMessage = msg || 'Login failed. Please try again.';
+          }
+        }
       });
     }
   }

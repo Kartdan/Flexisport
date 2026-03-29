@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { Router } from '@angular/router';
 import { User, AuthResponse } from '../models/models';
@@ -9,6 +9,7 @@ import { User, AuthResponse } from '../models/models';
 })
 export class AuthService {
   private apiUrl = 'http://localhost:5000/api/auth';
+  private usersUrl = 'http://localhost:5000/api/users';
 
   constructor(private http: HttpClient, private router: Router) {}
 
@@ -46,11 +47,32 @@ export class AuthService {
   }
 
   getUserRole(): string | null {
+    const user = this.getStoredUser();
+    return user ? user.role : null;
+  }
+
+  isAdmin(): boolean {
+    return this.getUserRole() === 'admin';
+  }
+
+  getStoredUser(): User | null {
     const userJson = localStorage.getItem('user');
-    if (userJson) {
-      const user = JSON.parse(userJson) as User;
-      return user.role;
-    }
-    return null;
+    return userJson ? JSON.parse(userJson) as User : null;
+  }
+
+  private getAuthHeaders(): HttpHeaders {
+    return new HttpHeaders({ Authorization: `Bearer ${this.getToken()}` });
+  }
+
+  getSupervisors(): Observable<User[]> {
+    return this.http.get<User[]>(`${this.usersUrl}/supervisors`, {
+      headers: this.getAuthHeaders()
+    });
+  }
+
+  updateSupervisorStatus(id: string, status: string): Observable<User> {
+    return this.http.patch<User>(`${this.usersUrl}/supervisors/${id}/status`, { status }, {
+      headers: this.getAuthHeaders()
+    });
   }
 }

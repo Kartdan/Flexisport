@@ -11,6 +11,11 @@ const userSchema = new mongoose.Schema({
     enum: ['admin', 'supervisor', 'player', 'owner'], 
     default: 'player' 
   },
+  supervisorStatus: {
+    type: String,
+    enum: ['pending', 'accepted', 'rejected'],
+    default: null
+  },
   createdAt: { type: Date, default: Date.now }
 }, { collection: "users" });
 

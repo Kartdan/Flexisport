@@ -1,0 +1,50 @@
+<div class="reviews-section">
+  <h3>Reviews</h3>
+
+  <div class="review-summary" *ngIf="summary.totalReviews > 0">
+    <span class="avg-rating">{{ summary.averageRating | number:'1.1-1' }}</span>
+    <span class="total">({{ summary.totalReviews }} review{{ summary.totalReviews > 1 ? 's' : '' }})</span>
+  </div>
+
+  <!-- Submit Review -->
+  <div class="review-form" *ngIf="isLoggedIn">
+    <h4>Leave a Review</h4>
+    <form [formGroup]="reviewForm" (ngSubmit)="submitReview()">
+      <div class="form-group">
+        <label for="rating">Rating</label>
+        <select id="rating" formControlName="rating">
+          <option [value]="5">★★★★★ (5)</option>
+          <option [value]="4">★★★★☆ (4)</option>
+          <option [value]="3">★★★☆☆ (3)</option>
+          <option [value]="2">★★☆☆☆ (2)</option>
+          <option [value]="1">★☆☆☆☆ (1)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="comment">Comment</label>
+        <textarea id="comment" formControlName="comment" rows="3" placeholder="Share your experience..."></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary" [disabled]="reviewForm.invalid">Submit Review</button>
+    </form>
+  </div>
+
+  <div *ngIf="errorMessage" class="alert alert-error">{{ errorMessage }}</div>
+
+  <!-- Reviews List -->
+  <div *ngIf="reviews.length === 0 && !errorMessage" class="empty-state">No reviews yet.</div>
+
+  <div class="review-list">
+    <div class="review-card" *ngFor="let review of reviews">
+      <div class="review-header">
+        <span class="review-author">{{ getAuthorName(review) }}</span>
+        <span class="review-stars">
+          <span *ngFor="let s of getStars(review.rating)" class="star filled">★</span>
+          <span *ngFor="let s of getEmptyStars(review.rating)" class="star">★</span>
+        </span>
+        <span class="review-date">{{ review.createdAt | date:'mediumDate' }}</span>
+      </div>
+      <p class="review-comment" *ngIf="review.comment">{{ review.comment }}</p>
+      <button *ngIf="isOwnReview(review)" class="btn btn-sm btn-delete" (click)="deleteReview(review)">Delete</button>
+    </div>
+  </div>
+</div>
