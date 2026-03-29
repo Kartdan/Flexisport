@@ -1,0 +1,58 @@
+<div class="court-approval">
+  <h2>Court Approval Management</h2>
+
+  <div *ngIf="successMessage" class="alert alert-success">{{ successMessage }}</div>
+  <div *ngIf="errorMessage" class="alert alert-error">{{ errorMessage }}</div>
+
+  <div *ngIf="courts.length === 0 && !errorMessage" class="empty-state">
+    No courts submitted yet.
+  </div>
+
+  <table *ngIf="courts.length > 0" class="courts-table">
+    <thead>
+      <tr>
+        <th>Court Name</th>
+        <th>Owner</th>
+        <th>Address</th>
+        <th>Sports</th>
+        <th>Price</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let court of courts">
+        <td>{{ court.name }}</td>
+        <td>{{ getAuthorName(court) }}</td>
+        <td>{{ court.address }}</td>
+        <td>{{ court.sportCategories.join(', ') }}</td>
+        <td>{{ court.pricePerHour }} RON/h</td>
+        <td>
+          <span [class]="'status-badge status-' + court.status">
+            {{ court.status }}
+          </span>
+        </td>
+        <td class="actions">
+          <button
+            class="btn btn-accept"
+            [disabled]="court.status === CourtStatus.ACCEPTED"
+            (click)="updateStatus(court, CourtStatus.ACCEPTED)">
+            Accept
+          </button>
+          <button
+            class="btn btn-reject"
+            [disabled]="court.status === CourtStatus.REJECTED"
+            (click)="updateStatus(court, CourtStatus.REJECTED)">
+            Reject
+          </button>
+          <button
+            class="btn btn-pending"
+            [disabled]="court.status === CourtStatus.PENDING"
+            (click)="updateStatus(court, CourtStatus.PENDING)">
+            Set Pending
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

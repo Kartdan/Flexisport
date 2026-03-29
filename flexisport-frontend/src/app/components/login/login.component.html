@@ -3,16 +3,34 @@
   <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
     <div class="form-group">
       <label for="email">Email Address</label>
-      <input type="email" id="email" formControlName="email" placeholder="enter your email">
+      <input type="email" id="email" formControlName="email" placeholder="Enter your email">
     </div>
     
     <div class="form-group">
       <label for="password">Password</label>
-      <input type="password" id="password" formControlName="password" placeholder="enter your password">
+      <input type="password" id="password" formControlName="password" placeholder="Enter your password">
     </div>
-    
+
+    <div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
+
     <button type="submit" [disabled]="loginForm.invalid">Sign In</button>
   </form>
-  
+
+  <div *ngIf="supervisorPending" class="status-banner status-pending">
+    <span class="status-icon">⏳</span>
+    <div>
+      <strong>Account pending approval</strong>
+      <p>Your supervisor account is awaiting administrator approval. You will be able to log in once it has been accepted.</p>
+    </div>
+  </div>
+
+  <div *ngIf="supervisorRejected" class="status-banner status-rejected">
+    <span class="status-icon">❌</span>
+    <div>
+      <strong>Account rejected</strong>
+      <p>Your supervisor account has been rejected by an administrator. Please contact support for more information.</p>
+    </div>
+  </div>
+
   <p class="footer-text">Don't have an account? <a routerLink="/signup">Register here</a></p>
 </div>

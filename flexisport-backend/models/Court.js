@@ -7,26 +7,55 @@ const courtSchema = new mongoose.Schema({
     required: true 
   },
 
-  pitchTypes: {
+  name: { type: String, required: true },
+
+  sportCategories: {
     type: [String],
     required: true,
-    enum: ["football", "basket", "tennis", "handball", "volleyball"],
+    enum: ["football", "basketball", "tennis", "handball", "volleyball", "padel"],
   },
 
-  numberOfPitchTypes: {
+  numberOfCourts: {
     type: Number,
     required: true,
     min: 1,
   },
 
-  location: { type: String, required: true },
+  address: { type: String, required: true },
 
-  prices: {
-    football: { type: Number, default: 0 },
-    basket: { type: Number, default: 0 },
-    tennis: { type: Number, default: 0 },
-    handball: { type: Number, default: 0 },
-    volleyball: { type: Number, default: 0 },
+  description: { type: String, default: "" },
+
+  phone: { type: String, default: "" },
+
+  pricePerHour: { type: Number, required: true, min: 0 },
+
+  surfaceType: {
+    type: String,
+    enum: ["grass", "clay", "synthetic", "hardcourt", "indoor", "sand", "parquet", "other"],
+    default: "other"
+  },
+
+  facilities: {
+    type: [String],
+    default: [],
+    enum: ["parking", "showers", "lighting", "locker_rooms", "wifi", "cafeteria", "equipment_rental"]
+  },
+
+  photos: {
+    type: [String],
+    default: []
+  },
+
+  status: {
+    type: String,
+    enum: ["pending", "accepted", "rejected"],
+    default: "pending"
+  },
+
+  operationalStatus: {
+    type: String,
+    enum: ["open", "closed", "maintenance", "unavailable"],
+    default: "open"
   },
 
   schedules: [

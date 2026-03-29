@@ -2,3 +2,5 @@ node_modules/
 dist/
 .angular/
 .env
+**/.github/copilot-instructions.md
+**/.github/INSTRUCTIONS.md

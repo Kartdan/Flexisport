@@ -1,14 +1,18 @@
 const express = require("express");
 const Post = require("../models/Post");
+const { verifyToken } = require("../middleware/auth");
 
 const router = express.Router();
 
-router.post("/", async (req, res) => {
+router.post("/", verifyToken, async (req, res) => {
   try {
     const newPost = new Post({
-      title: req.body.title || "Untitled Post",
-      content: req.body.content || "No content provided",
-      author: req.body.author || "Anonymous",
+      title: req.body.title,
+      content: req.body.content,
+      authorRef: req.user.id,
+      authorName: req.body.authorName || req.user.fullName || req.user.username || "Unknown",
+      courtRef: req.body.courtRef || null,
+      postType: req.body.postType || "manual",
     });
 
     const savedPost = await newPost.save();
@@ -21,7 +25,12 @@ router.post("/", async (req, res) => {
 
 router.get("/", async (req, res) => {
   try {
-    const posts = await Post.find();
+    res.set("Cache-Control", "no-store, no-cache, must-revalidate");
+    res.set("Pragma", "no-cache");
+    res.set("Expires", "0");
+    const posts = await Post.find()
+      .sort({ date: -1 })
+      .populate("authorRef", "fullName username role");
     res.json(posts);
   } catch (err) {
     console.error("❌ Error fetching posts:", err);

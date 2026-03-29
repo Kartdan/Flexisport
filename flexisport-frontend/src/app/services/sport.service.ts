@@ -1,0 +1,17 @@
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { Sport } from '../models/models';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class SportService {
+  private apiUrl = 'http://localhost:5000/api/sports';
+
+  constructor(private http: HttpClient) {}
+
+  getSports(countryCode = 'RO'): Observable<Sport[]> {
+    return this.http.get<Sport[]>(`${this.apiUrl}?country=${countryCode}`);
+  }
+}

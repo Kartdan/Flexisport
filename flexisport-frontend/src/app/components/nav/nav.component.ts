@@ -17,4 +17,12 @@ export class NavComponent {
   public get isLoggedIn() {
     return this.authService.isLoggedIn();
   }
+
+  public get isAdmin() {
+    return this.authService.isAdmin();
+  }
+
+  public get isOwner() {
+    return this.authService.getUserRole() === 'owner';
+  }
 }

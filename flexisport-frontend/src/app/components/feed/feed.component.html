@@ -1,0 +1,27 @@
+<div class="feed-page">
+  <div class="feed-header">
+    <h2>Community Feed</h2>
+    <p class="feed-subtitle">Latest updates from court owners and supervisors</p>
+  </div>
+
+  <div *ngIf="loading" class="loading">Loading posts...</div>
+  <div *ngIf="errorMessage" class="alert alert-error">{{ errorMessage }}</div>
+
+  <div *ngIf="!loading && posts.length === 0 && !errorMessage" class="empty-state">
+    No posts yet. Check back soon!
+  </div>
+
+  <div class="posts-list" *ngIf="!loading && posts.length > 0">
+    <div class="post-card" *ngFor="let post of posts">
+      <div class="post-card-header">
+        <span class="post-type-badge">{{ postTypeLabel(post.postType) }}</span>
+        <span class="post-time">{{ timeAgo(post.date) }}</span>
+      </div>
+      <h3 class="post-title">{{ post.title }}</h3>
+      <p class="post-content">{{ post.content }}</p>
+      <div class="post-footer">
+        <span class="post-author">by {{ post.authorName }}</span>
+      </div>
+    </div>
+  </div>
+</div>
