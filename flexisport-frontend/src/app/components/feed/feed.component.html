@@ -1,7 +1,18 @@
 <div class="feed-page">
   <div class="feed-header">
-    <h2>Community Feed</h2>
-    <p class="feed-subtitle">Latest updates from court owners and supervisors</p>
+    <div class="feed-header-content">
+      <div>
+        <h2>Community Feed</h2>
+        <p class="feed-subtitle">Latest updates from court owners and supervisors</p>
+      </div>
+      <button
+        *ngIf="canCreatePost"
+        class="create-post-btn"
+        (click)="goToCreatePost()"
+      >
+        ✎ Create Post
+      </button>
+    </div>
   </div>
 
   <div *ngIf="loading" class="loading">Loading posts...</div>

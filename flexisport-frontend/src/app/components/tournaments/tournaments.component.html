@@ -1,0 +1,65 @@
+<div class="tournaments-page">
+  <div class="tournaments-header">
+    <h2>All Tournaments</h2>
+    <p class="subtitle">Discover upcoming competitions and join the action.</p>
+  </div>
+
+  <div *ngIf="loading" class="loading">Loading tournaments...</div>
+  <div *ngIf="errorMessage" class="alert alert-error">{{ errorMessage }}</div>
+
+  <div *ngIf="!loading && tournaments.length === 0" class="empty-state">
+    No tournaments published yet.
+  </div>
+
+  <div class="tournaments-grid" *ngIf="!loading && tournaments.length > 0">
+    <article class="tournament-card" *ngFor="let tournament of tournaments" (click)="openTournament(tournament._id)">
+      <div class="cover" *ngIf="tournament.coverPhoto">
+        <img [src]="tournament.coverPhoto" [alt]="tournament.name" />
+      </div>
+      <div class="cover placeholder" *ngIf="!tournament.coverPhoto">No cover photo</div>
+
+      <div class="content">
+        <h3>{{ tournament.name }}</h3>
+        <p class="meta">{{ tournament.sport | titlecase }} · {{ tournament.format }}</p>
+        <p class="meta" *ngIf="isModerator">Publication: {{ getPublicationStatusLabel(tournament.publicationStatus) }}</p>
+        <p class="meta">Experience: {{ getExperienceLevelLabel(tournament.experienceLevel) }}</p>
+        <p class="meta">{{ getCourtName(tournament.court) }} · by {{ getAuthorName(tournament.author) }}</p>
+        <p class="meta">Location: {{ getCourtAddress(tournament.court) }}</p>
+        <p class="description">{{ tournament.description }}</p>
+
+        <div class="stats">
+          <span>{{ tournament.startDate | date: 'MMM d, y, h:mm a' }}</span>
+          <span>Deadline: {{ tournament.registrationDeadline | date: 'MMM d, y, h:mm a' }}</span>
+          <span>{{ tournament.registeredParticipants?.length || 0 }} / {{ tournament.maxParticipants }} players</span>
+        </div>
+
+        <div class="moderation-actions" *ngIf="isModerator && tournament._id">
+          <button
+            type="button"
+            class="mod-btn publish"
+            [disabled]="actionLoadingId === tournament._id || tournament.publicationStatus === 'published'"
+            (click)="onModerationAction($event, tournament, 'published')"
+          >
+            Publish
+          </button>
+          <button
+            type="button"
+            class="mod-btn unpublish"
+            [disabled]="actionLoadingId === tournament._id || tournament.publicationStatus === 'unpublished'"
+            (click)="onModerationAction($event, tournament, 'unpublished')"
+          >
+            Unpublish
+          </button>
+          <button
+            type="button"
+            class="mod-btn suspend"
+            [disabled]="actionLoadingId === tournament._id || tournament.publicationStatus === 'suspended'"
+            (click)="onModerationAction($event, tournament, 'suspended')"
+          >
+            Suspend
+          </button>
+        </div>
+      </div>
+    </article>
+  </div>
+</div>

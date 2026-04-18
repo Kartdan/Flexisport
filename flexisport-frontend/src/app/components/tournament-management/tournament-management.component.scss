@@ -1,0 +1,460 @@
+.tournament-management-page {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 2rem;
+
+  h2 {
+    font-size: 2rem;
+    color: #1a1a1a;
+    margin-bottom: 1.5rem;
+  }
+
+  .alert {
+    padding: 1rem;
+    border-radius: 4px;
+    margin-bottom: 1.5rem;
+
+    &.alert-success {
+      background-color: #e8f5e9;
+      color: #2e7d32;
+      border-left: 4px solid #4caf50;
+    }
+
+    &.alert-error {
+      background-color: #ffebee;
+      color: #c62828;
+      border-left: 4px solid #f44336;
+    }
+  }
+
+  .btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    &.btn-primary {
+      background-color: #00d1b2;
+      color: white;
+
+      &:hover:not(:disabled) {
+        background-color: #00a88d;
+      }
+    }
+
+    &.btn-secondary {
+      background-color: #f5f5f5;
+      color: #1a1a1a;
+      border: 1px solid #ddd;
+
+      &:hover:not(:disabled) {
+        background-color: #eeeeee;
+      }
+    }
+
+    &.btn-danger {
+      background-color: #dc3545;
+      color: white;
+
+      &:hover:not(:disabled) {
+        background-color: #c82333;
+      }
+    }
+
+    &.btn-sm {
+      padding: 0.5rem 1rem;
+      font-size: 0.9rem;
+    }
+  }
+
+  // Form Section
+  .form-section {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    margin-top: 1rem;
+
+    h3 {
+      font-size: 1.3rem;
+      color: #1a1a1a;
+      margin-bottom: 1.5rem;
+    }
+  }
+
+  .tournament-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+
+    label {
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: #1a1a1a;
+
+      .required {
+        color: #f44336;
+      }
+    }
+
+    .form-control {
+      padding: 0.75rem 1rem;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 1rem;
+      font-family: inherit;
+
+      &:focus {
+        outline: none;
+        border-color: #00d1b2;
+        box-shadow: 0 0 5px rgba(0, 209, 178, 0.3);
+      }
+    }
+
+    textarea.form-control {
+      resize: vertical;
+    }
+
+    .photo-preview {
+      margin-top: 1rem;
+      border-radius: 4px;
+      overflow: hidden;
+      aspect-ratio: 16 / 9;
+      position: relative;
+      background-color: #f0f0f0;
+
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+
+      .remove-photo {
+        position: absolute;
+        bottom: 0.5rem;
+        left: 0.5rem;
+        right: 0.5rem;
+        width: auto;
+      }
+    }
+
+    .file-input-label {
+      display: inline-block;
+      padding: 0.5rem 1rem;
+      background-color: #f5f5f5;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-top: 0.5rem;
+      transition: all 0.3s;
+
+      &:hover:not(.disabled) {
+        background-color: #eeeeee;
+        border-color: #999;
+      }
+
+      &.disabled {
+        background-color: #f0f0f0;
+        border-color: #ccc;
+        cursor: not-allowed;
+        opacity: 0.6;
+      }
+    }
+
+    #coverPhoto {
+      display: none;
+
+      &:disabled {
+        cursor: not-allowed;
+      }
+    }
+  }
+
+  .form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+
+  // Tournaments Section
+  .tournaments-section {
+    h3 {
+      font-size: 1.3rem;
+      color: #1a1a1a;
+      margin-bottom: 1.5rem;
+      margin-top: 2rem;
+    }
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 2rem;
+    background-color: #f9f9f9;
+    border-radius: 4px;
+    color: #666;
+  }
+
+  .tournaments-list {
+    display: grid;
+    gap: 1.5rem;
+  }
+
+  .tournament-card {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 1.5rem;
+    transition: box-shadow 0.3s;
+
+    &:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .tournament-cover {
+      margin: -1.5rem -1.5rem 1rem -1.5rem;
+      border-radius: 8px 8px 0 0;
+      overflow: hidden;
+      aspect-ratio: 16 / 9;
+
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+    }
+
+    .tournament-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #eee;
+
+      h4 {
+        margin: 0 0 0.25rem;
+        font-size: 1.2rem;
+        color: #1a1a1a;
+      }
+
+      .tournament-court {
+        margin: 0;
+        font-size: 0.9rem;
+        color: #666;
+      }
+    }
+
+    .tournament-details {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1rem;
+
+      .detail {
+        padding: 0.75rem;
+        background-color: #f9f9f9;
+        border-radius: 4px;
+
+        strong {
+          display: block;
+          color: #1a1a1a;
+          margin-bottom: 0.25rem;
+          font-size: 0.85rem;
+        }
+
+        span {
+          color: #666;
+        }
+      }
+    }
+
+    .tournament-description {
+      margin: 1rem 0;
+      color: #555;
+      line-height: 1.5;
+    }
+
+    .tournament-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .questions-panel {
+      margin-top: 1rem;
+      border-top: 1px solid #e9ecef;
+      padding-top: 1rem;
+
+      .questions-loading,
+      .questions-empty {
+        color: #6c757d;
+        font-size: 0.9rem;
+      }
+
+      .question-item {
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 0.8rem;
+        margin-bottom: 0.75rem;
+        background: #fafafa;
+
+        .question-head {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 0.4rem;
+
+          .question-head-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+          }
+
+          .edit-question-btn {
+            padding: 0.15rem 0.35rem;
+            font-size: 0.75rem;
+            line-height: 1;
+            min-width: 26px;
+          }
+        }
+
+        .question-text {
+          margin: 0 0 0.6rem;
+          color: #374151;
+        }
+      }
+
+      .answers-list {
+        margin-bottom: 0.6rem;
+
+        .answer-item {
+          background: #f1f5f9;
+          border-left: 3px solid #00d1b2;
+          border-radius: 6px;
+          padding: 0.55rem;
+          margin-bottom: 0.45rem;
+
+          .answer-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.2rem;
+          }
+
+          strong {
+            display: block;
+            color: #0f172a;
+          }
+
+          p {
+            margin: 0;
+            color: #334155;
+          }
+
+          .edit-answer-btn {
+            padding: 0.15rem 0.45rem;
+            font-size: 0.72rem;
+            line-height: 1.1;
+            min-width: 26px;
+          }
+        }
+      }
+
+      .answer-form {
+        display: grid;
+        gap: 0.5rem;
+
+        textarea {
+          border: 1px solid #cbd5e1;
+          border-radius: 6px;
+          padding: 0.5rem;
+          resize: vertical;
+          font-family: inherit;
+        }
+
+        button {
+          justify-self: end;
+        }
+      }
+
+      .edit-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.4rem;
+      }
+
+      .edited-badge {
+        margin-left: 0.35rem;
+        color: #6b7280;
+        font-size: 0.78rem;
+        font-style: italic;
+      }
+    }
+
+    .participants-panel {
+      margin-top: 1rem;
+      border-top: 1px solid #e9ecef;
+      padding-top: 1rem;
+
+      .participants-empty {
+        color: #6c757d;
+        font-size: 0.9rem;
+      }
+
+      .participants-list {
+        display: grid;
+        gap: 0.55rem;
+      }
+
+      .participant-item {
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        background: #f8fafc;
+        padding: 0.6rem 0.7rem;
+      }
+
+      .participant-name {
+        margin: 0;
+        font-weight: 600;
+        color: #0f172a;
+      }
+
+      .participant-meta {
+        margin: 0.2rem 0 0;
+        color: #475569;
+        font-size: 0.85rem;
+      }
+    }
+  }
+
+  .loading {
+    text-align: center;
+    padding: 2rem;
+    color: #666;
+    font-style: italic;
+  }
+}

@@ -1,0 +1,90 @@
+<div class="courts-page">
+  <div class="courts-header">
+    <h2>Available Courts</h2>
+    <p class="courts-subtitle">Browse and find the perfect court for your sport</p>
+  </div>
+
+  <div class="filter-section">
+    <div class="filter-group">
+      <label for="sport-filter">Filter by sport:</label>
+      <select
+        id="sport-filter"
+        [(ngModel)]="selectedSport"
+        (change)="onSportChange()"
+        class="sport-select"
+      >
+        <option value="">All Sports</option>
+        <option *ngFor="let sport of sports" [value]="sport.slug">
+          {{ sport.emoji }} {{ sport.name }}
+        </option>
+      </select>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="loading">Loading courts...</div>
+  <div *ngIf="errorMessage" class="alert alert-error">{{ errorMessage }}</div>
+
+  <div *ngIf="!loading && filteredCourts.length === 0 && !errorMessage" class="empty-state">
+    No courts available. Check back soon!
+  </div>
+
+  <div class="courts-grid" *ngIf="!loading && filteredCourts.length > 0">
+    <div
+      class="court-card"
+      *ngFor="let court of filteredCourts"
+      (click)="goToCourtDetail(court._id)"
+    >
+      <div class="court-header">
+        <h3>{{ court.name }}</h3>
+        <span [ngClass]="getStatusBadgeClass(court.operationalStatus)" class="status-badge">
+          {{ getStatusLabel(court.operationalStatus) }}
+        </span>
+      </div>
+
+      <div class="court-image" *ngIf="court.photos && court.photos.length > 0">
+        <img [src]="court.photos[0]" [alt]="court.name" />
+      </div>
+      <div class="court-image-placeholder" *ngIf="!court.photos || court.photos.length === 0">
+        <span>No image available</span>
+      </div>
+
+      <div class="court-details">
+        <p><strong>Address:</strong> {{ court.address }}</p>
+        <p>
+          <strong>Rating:</strong>
+          <span *ngIf="(court.totalReviews || 0) > 0">
+            {{ (court.averageRating || 0) | number:'1.1-1' }} / 5 ({{ court.totalReviews }} review{{ (court.totalReviews || 0) > 1 ? 's' : '' }})
+          </span>
+          <span *ngIf="(court.totalReviews || 0) === 0">No ratings yet</span>
+        </p>
+        <p><strong>Number of Courts:</strong> {{ court.numberOfCourts }}</p>
+        <p><strong>Price:</strong> {{ court.pricePerHour }} RON / hour</p>
+        <p><strong>Surface:</strong> {{ court.surfaceType }}</p>
+
+        <div class="sports-list" *ngIf="court.sportCategories && court.sportCategories.length > 0">
+          <strong>Sports:</strong>
+          <div class="sport-tags">
+            <span class="sport-tag" *ngFor="let sport of court.sportCategories">
+              {{ sport }}
+            </span>
+          </div>
+        </div>
+
+        <div class="facilities-list" *ngIf="court.facilities && court.facilities.length > 0">
+          <strong>Facilities:</strong>
+          <div class="facility-tags">
+            <span class="facility-tag" *ngFor="let facility of court.facilities">
+              {{ facility }}
+            </span>
+          </div>
+        </div>
+
+        <p class="court-description">{{ court.description }}</p>
+      </div>
+
+      <div class="court-footer">
+        <button class="book-btn">Book Now</button>
+      </div>
+    </div>
+  </div>
+</div>

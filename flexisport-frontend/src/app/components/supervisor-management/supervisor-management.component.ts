@@ -1,6 +1,6 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { AuthService } from '../../services/auth.service';
-import { User, SupervisorStatus } from '../../models/models';
+import { User, SupervisorStatus } from '../../interfaces';
 
 @Component({
   selector: 'app-supervisor-management',

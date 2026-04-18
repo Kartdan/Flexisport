@@ -1,18 +1,54 @@
 <nav class="navbar">
   <div class="nav-logo">
     <h1>FlexiSport</h1>
+    <span class="current-user" *ngIf="isLoggedIn && currentUsername">@{{ currentUsername }}</span>
   </div>
   <ul class="nav-links">
-    <li><a href="javascript:void(0)">Home</a></li>
-    <li><a routerLink="/feed">Feed</a></li>
-    <li><a href="javascript:void(0)">Courts</a></li>
-    <li><a href="javascript:void(0)">My Bookings</a></li>
-    <li><a href="javascript:void(0)">Profile</a></li>
+    <li><a routerLink="/home">Home</a></li>
+    <li *ngIf="isLoggedIn"><a routerLink="/feed">Feed</a></li>
+    <li><a routerLink="/courts">Courts</a></li>
+    <li><a routerLink="/tournaments">Tournaments</a></li>
+    <li *ngIf="isLoggedIn"><a routerLink="/bookings">My Bookings</a></li>
+    <li *ngIf="isLoggedIn"><a routerLink="/profile">Profile</a></li>
     <li *ngIf="isAdmin"><a routerLink="/admin/supervisors">Supervisors</a></li>
     <li *ngIf="isAdmin"><a routerLink="/admin/courts">Court Approvals</a></li>
     <li *ngIf="isOwner"><a routerLink="/my-courts">My Courts</a></li>
+    <li *ngIf="isOwner"><a routerLink="/my-tournaments">My Tournaments</a></li>
   </ul>
   <div class="nav-auth" *ngIf="isLoggedIn">
+    <div class="notification-wrapper" #notificationWrapper>
+      <button class="notification-btn" type="button" (click)="toggleNotifications()" aria-label="Notifications">
+        🔔
+        <span class="notification-count" *ngIf="unreadCount > 0">{{ unreadCount }}</span>
+      </button>
+
+      <div class="notification-dropdown" *ngIf="showNotifications">
+        <div class="notification-header">
+          <strong>Notifications</strong>
+          <button type="button" class="mark-read-all" (click)="markAllNotificationsAsRead()">Mark all read</button>
+        </div>
+
+        <div class="notification-error" *ngIf="notificationError">{{ notificationError }}</div>
+
+        <div class="notification-item" *ngFor="let notification of notifications" [class.unread]="!notification.isRead">
+          <div>
+            <p class="title">{{ notification.title }}</p>
+            <p class="message">{{ notification.message }}</p>
+          </div>
+          <button
+            type="button"
+            class="mark-read"
+            *ngIf="!notification.isRead"
+            (click)="markNotificationAsRead(notification)"
+          >
+            Mark read
+          </button>
+        </div>
+
+        <div class="notification-empty" *ngIf="notifications.length === 0">No notifications</div>
+      </div>
+    </div>
+
     <button class="logout-btn" (click)="onLogout()">Logout</button>
   </div>
 </nav>

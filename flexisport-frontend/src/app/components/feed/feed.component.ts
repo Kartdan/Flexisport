@@ -1,6 +1,8 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Router } from '@angular/router';
 import { PostService } from '../../services/post.service';
-import { Post } from '../../models/models';
+import { AuthService } from '../../services/auth.service';
+import { Post } from '../../interfaces';
 
 @Component({
   selector: 'app-feed',
@@ -13,7 +15,12 @@ export class FeedComponent implements OnInit {
   loading = true;
   errorMessage = '';
 
-  constructor(private postService: PostService, private cdr: ChangeDetectorRef) {}
+  constructor(
+    private postService: PostService,
+    private authService: AuthService,
+    private router: Router,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit(): void {
     this.postService.getAllPosts().subscribe({
@@ -46,5 +53,21 @@ export class FeedComponent implements OnInit {
     if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
     if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
     return `${Math.floor(diff / 86400)}d ago`;
+  }
+
+  goToCreatePost(): void {
+    this.router.navigate(['/feed/create']);
+  }
+
+  get isAdmin(): boolean {
+    return this.authService.isAdmin();
+  }
+
+  get isSupervisor(): boolean {
+    return this.authService.getUserRole() === 'supervisor';
+  }
+
+  get canCreatePost(): boolean {
+    return this.isAdmin || this.isSupervisor;
   }
 }

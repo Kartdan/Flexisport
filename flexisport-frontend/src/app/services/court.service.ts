@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Court, CourtStatus } from '../models/models';
+import { Court, CourtStatus } from '../interfaces';
 import { AuthService } from './auth.service';
 
 @Injectable({
@@ -18,7 +18,9 @@ export class CourtService {
 
   getAllCourts(sport?: string): Observable<Court[]> {
     const url = sport ? `${this.apiUrl}?sport=${sport}` : this.apiUrl;
-    return this.http.get<Court[]>(url);
+    return this.http.get<Court[]>(url, {
+      headers: new HttpHeaders({ 'Cache-Control': 'no-cache' })
+    });
   }
 
   getCourtById(id: string): Observable<Court> {

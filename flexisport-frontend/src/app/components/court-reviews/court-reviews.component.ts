@@ -2,7 +2,7 @@ import { Component, Input, OnInit, ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ReviewService } from '../../services/review.service';
 import { AuthService } from '../../services/auth.service';
-import { Review, ReviewSummary } from '../../models/models';
+import { Review, ReviewSummary } from '../../interfaces';
 
 @Component({
   selector: 'app-court-reviews',
@@ -18,6 +18,9 @@ export class CourtReviewsComponent implements OnInit {
   reviewForm: FormGroup;
   isLoggedIn = false;
   errorMessage = '';
+  showSuccessPopup = false;
+  successPopupTitle = 'Success';
+  successPopupMessage = '';
 
   constructor(
     private reviewService: ReviewService,
@@ -27,7 +30,7 @@ export class CourtReviewsComponent implements OnInit {
   ) {
     this.reviewForm = this.fb.group({
       rating: [5, [Validators.required, Validators.min(1), Validators.max(5)]],
-      comment: ['']
+      comment: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(500)]]
     });
   }
 
@@ -54,14 +57,33 @@ export class CourtReviewsComponent implements OnInit {
   submitReview(): void {
     if (!this.reviewForm.valid) return;
     const { rating, comment } = this.reviewForm.value;
-    this.reviewService.submitReview(this.courtId, rating, comment).subscribe({
+    const trimmedComment = (comment || '').trim();
+
+    if (!trimmedComment) {
+      this.errorMessage = 'Please enter review text.';
+      return;
+    }
+
+    this.reviewService.submitReview(this.courtId, rating, trimmedComment).subscribe({
       next: () => {
         this.reviewForm.reset({ rating: 5, comment: '' });
+        this.errorMessage = '';
+        this.openSuccessPopup('Review Submitted', 'Your review was submitted successfully.');
         this.loadReviews();
         this.loadSummary();
       },
       error: () => this.errorMessage = 'Failed to submit review.'
     });
+  }
+
+  onSuccessPopupClosed(): void {
+    this.showSuccessPopup = false;
+  }
+
+  private openSuccessPopup(title: string, message: string): void {
+    this.successPopupTitle = title;
+    this.successPopupMessage = message;
+    this.showSuccessPopup = true;
   }
 
   deleteReview(review: Review): void {
@@ -76,6 +98,10 @@ export class CourtReviewsComponent implements OnInit {
     if (!user || !review.author) return false;
     const authorId = typeof review.author === 'string' ? review.author : (review.author as any)._id;
     return authorId === (user._id || user.id);
+  }
+
+  get hasOwnReview(): boolean {
+    return this.reviews.some((review) => this.isOwnReview(review));
   }
 
   getAuthorName(review: Review): string {

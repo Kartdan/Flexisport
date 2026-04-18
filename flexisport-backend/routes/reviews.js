@@ -35,15 +35,24 @@ router.post("/court/:courtId", verifyToken, async (req, res) => {
       return res.status(400).json({ error: "Rating must be between 1 and 5" });
     }
 
-    const review = await Review.findOneAndUpdate(
-      { court: req.params.courtId, author: req.user.id },
-      { rating, comment, court: req.params.courtId, author: req.user.id },
-      { new: true, upsert: true, setDefaultsOnInsert: true }
-    );
+    const existingReview = await Review.findOne({ court: req.params.courtId, author: req.user.id });
+    if (existingReview) {
+      return res.status(409).json({ error: "You already reviewed this court. Delete your old review before adding a new one." });
+    }
+
+    const review = await Review.create({
+      court: req.params.courtId,
+      author: req.user.id,
+      rating,
+      comment
+    });
 
     const populated = await review.populate("author", "fullName username");
     res.status(201).json(populated);
   } catch (err) {
+    if (err?.code === 11000) {
+      return res.status(409).json({ error: "You already reviewed this court. Delete your old review before adding a new one." });
+    }
     res.status(500).json({ error: "Failed to save review" });
   }
 });

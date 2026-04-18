@@ -4,8 +4,8 @@ import { CourtService } from '../../services/court.service';
 import { SportService } from '../../services/sport.service';
 import { PostService } from '../../services/post.service';
 import { AuthService } from '../../services/auth.service';
-import { Court, Sport } from '../../models/models';
-import { PostDialogData } from '../post-dialog/post-dialog.component';
+import { Court, Sport } from '../../interfaces';
+import { PostDialogData } from '../../interfaces';
 
 @Component({
   selector: 'app-court-management',
@@ -22,8 +22,11 @@ export class CourtManagementComponent implements OnInit {
   errorMessage = '';
   successMessage = '';
   selectedPhotos: File[] = [];
+  selectedPhotoPreviews: string[] = [];
   existingPhotos: string[] = [];
   removingPhoto = false;
+  showDetailPreview = false;
+  previewPhotoIndex = 0;
 
   showPostDialog = false;
   postDialogTitle = '';
@@ -100,7 +103,10 @@ export class CourtManagementComponent implements OnInit {
     this.editingCourt = null;
     this.courtForm = this.createForm();
     this.selectedPhotos = [];
+    this.selectedPhotoPreviews = [];
     this.existingPhotos = [];
+    this.showDetailPreview = false;
+    this.previewPhotoIndex = 0;
     this.showForm = true;
   }
 
@@ -123,6 +129,9 @@ export class CourtManagementComponent implements OnInit {
       scheduleEnd: court.schedules?.[0]?.endTime || '22:00'
     });
     this.selectedPhotos = [];
+    this.selectedPhotoPreviews = [];
+    this.showDetailPreview = false;
+    this.previewPhotoIndex = 0;
     this.showForm = true;
     this.cdr.detectChanges();
   }
@@ -130,7 +139,10 @@ export class CourtManagementComponent implements OnInit {
   cancelForm(): void {
     this.showForm = false;
     this.editingCourt = null;
+    this.selectedPhotoPreviews = [];
     this.existingPhotos = [];
+    this.showDetailPreview = false;
+    this.previewPhotoIndex = 0;
   }
 
   removeExistingPhoto(photo: string): void {
@@ -141,6 +153,7 @@ export class CourtManagementComponent implements OnInit {
         this.existingPhotos = updated.photos || [];
         const idx = this.courts.findIndex(c => c._id === updated._id);
         if (idx !== -1) this.courts[idx] = updated;
+        this.previewPhotoIndex = Math.min(this.previewPhotoIndex, Math.max(this.previewPhotos.length - 1, 0));
         this.removingPhoto = false;
         this.cdr.detectChanges();
       },
@@ -164,12 +177,15 @@ export class CourtManagementComponent implements OnInit {
         seen.add(key);
         return true;
       }).slice(0, 10);
+      void this.refreshSelectedPhotoPreviews();
       input.value = '';
     }
   }
 
   removeSelectedPhoto(index: number): void {
     this.selectedPhotos = this.selectedPhotos.filter((_, i) => i !== index);
+    this.selectedPhotoPreviews = this.selectedPhotoPreviews.filter((_, i) => i !== index);
+    this.previewPhotoIndex = Math.min(this.previewPhotoIndex, Math.max(this.previewPhotos.length - 1, 0));
   }
 
   onFacilityToggle(facility: string, event: Event): void {
@@ -325,5 +341,68 @@ export class CourtManagementComponent implements OnInit {
 
   formatFacility(f: string): string {
     return f.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+  }
+
+  toggleDetailPreview(): void {
+    this.showDetailPreview = !this.showDetailPreview;
+  }
+
+  getPreviewDetailStatusLabel(status: string | undefined): string {
+    switch (status) {
+      case 'open':
+        return '🟢 Open';
+      case 'closed':
+        return '🔴 Closed';
+      case 'maintenance':
+        return '🟡 Maintenance';
+      case 'unavailable':
+        return '⚫ Unavailable';
+      default:
+        return 'Open';
+    }
+  }
+
+  getPreviewStatusLabel(status: string | undefined): string {
+    return this.operationalStatuses.find(s => s.value === status)?.label || 'Unavailable';
+  }
+
+  getPreviewStatusBadgeClass(status: string | undefined): string {
+    return `badge-${status || 'unavailable'}`;
+  }
+
+  get previewPhoto(): string | null {
+    return this.previewPhotos[this.previewPhotoIndex] || null;
+  }
+
+  get previewPhotos(): string[] {
+    return this.selectedPhotoPreviews.length > 0 ? this.selectedPhotoPreviews : this.existingPhotos;
+  }
+
+  nextPreviewPhoto(): void {
+    if (this.previewPhotos.length === 0) return;
+    this.previewPhotoIndex = (this.previewPhotoIndex + 1) % this.previewPhotos.length;
+  }
+
+  previousPreviewPhoto(): void {
+    if (this.previewPhotos.length === 0) return;
+    this.previewPhotoIndex = (this.previewPhotoIndex - 1 + this.previewPhotos.length) % this.previewPhotos.length;
+  }
+
+  private async refreshSelectedPhotoPreviews(): Promise<void> {
+    const previews = await Promise.all(
+      this.selectedPhotos.map(async (file) => this.readFileAsDataUrl(file))
+    );
+    this.selectedPhotoPreviews = previews;
+    this.previewPhotoIndex = Math.min(this.previewPhotoIndex, Math.max(this.previewPhotos.length - 1, 0));
+    this.cdr.detectChanges();
+  }
+
+  private readFileAsDataUrl(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve((reader.result as string) || '');
+      reader.onerror = () => reject(new Error('Failed to read file preview'));
+      reader.readAsDataURL(file);
+    });
   }
 }

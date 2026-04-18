@@ -32,6 +32,34 @@
     select, textarea { width: 100%; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px; font-size: 0.9rem; box-sizing: border-box; }
     textarea { resize: vertical; }
   }
+
+  .rating-options {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .rating-option {
+    display: inline-flex;
+    align-items: center;
+    gap: 0;
+    padding: 0.35rem 0.55rem;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    background: #fff;
+    font-size: 0.85rem;
+    color: #374151;
+    cursor: pointer;
+
+    input {
+      margin: 0;
+    }
+
+    span {
+      line-height: 1;
+      margin-left: 0.8rem;
+    }
+  }
 }
 
 .review-list {
@@ -73,6 +101,16 @@
   background: #f8d7da;
   color: #721c24;
   border: 1px solid #f5c6cb;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+  font-size: 0.85rem;
+}
+
+.alert.alert-info {
+  background: #e0f2fe;
+  color: #0c4a6e;
+  border: 1px solid #bae6fd;
   padding: 0.5rem 0.75rem;
   border-radius: 6px;
   margin-bottom: 1rem;

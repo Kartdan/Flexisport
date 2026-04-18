@@ -16,6 +16,20 @@ const userSchema = new mongoose.Schema({
     enum: ['pending', 'accepted', 'rejected'],
     default: null
   },
+  preferredSports: {
+    type: [String],
+    enum: ['football', 'basketball', 'tennis', 'handball', 'volleyball', 'padel'],
+    default: []
+  },
+  gamesPlayedBySport: {
+    type: Map,
+    of: Number,
+    default: {}
+  },
+  personalDescription: {
+    type: String,
+    default: ''
+  },
   createdAt: { type: Date, default: Date.now }
 }, { collection: "users" });
 

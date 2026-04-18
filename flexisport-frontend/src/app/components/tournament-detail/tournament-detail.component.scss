@@ -1,0 +1,261 @@
+.tournament-detail-page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.back-btn {
+  margin-bottom: 1rem;
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  color: #0f172a;
+  border-radius: 8px;
+  padding: 0.5rem 0.8rem;
+  cursor: pointer;
+
+  &:hover {
+    background: #f8fafc;
+  }
+}
+
+.loading {
+  padding: 1rem;
+  color: #475569;
+}
+
+.alert.alert-error {
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.detail-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.hero {
+  height: 260px;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1rem 0.5rem;
+
+  h1 {
+    margin: 0;
+    color: #0f172a;
+    font-size: 1.8rem;
+  }
+
+  .status {
+    background: #e2e8f0;
+    color: #0f172a;
+    border-radius: 999px;
+    padding: 0.35rem 0.7rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+}
+
+.description {
+  padding: 0 1rem;
+  color: #334155;
+}
+
+.grid {
+  padding: 1rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.8rem;
+
+  div {
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 0.7rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  strong {
+    color: #334155;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+
+  span {
+    color: #0f172a;
+    font-weight: 600;
+  }
+}
+
+.questions-section {
+  padding: 1rem;
+  border-top: 1px solid #e2e8f0;
+
+  h2 {
+    margin: 0 0 0.6rem;
+    color: #0f172a;
+    font-size: 1.3rem;
+  }
+}
+
+.registration-section {
+  padding: 1rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.registration-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.register-btn,
+.unregister-btn {
+  border: none;
+  border-radius: 8px;
+  padding: 0.55rem 0.9rem;
+  min-width: 220px;
+  text-align: center;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.register-btn {
+  background: #16a34a;
+  color: #fff;
+}
+
+.unregister-btn {
+  background: #dc2626;
+  color: #fff;
+}
+
+.registration-hint {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.ask-form {
+  display: grid;
+  gap: 0.6rem;
+
+  textarea {
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 0.65rem;
+    resize: vertical;
+    font: inherit;
+  }
+
+  button {
+    justify-self: end;
+    border: none;
+    background: #0ea5e9;
+    color: #fff;
+    padding: 0.55rem 0.85rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+}
+
+.questions-list {
+  margin-top: 0.85rem;
+  display: grid;
+  gap: 0.7rem;
+}
+
+.question-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 0.7rem;
+
+  .question-text {
+    margin: 0 0 0.5rem;
+    color: #0f172a;
+    line-height: 1.45;
+  }
+
+  .question-meta {
+    display: flex;
+    justify-content: space-between;
+    color: #64748b;
+    font-size: 0.8rem;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+  }
+
+  .answers {
+    margin: 0.55rem 0;
+    display: grid;
+    gap: 0.45rem;
+  }
+
+  .answer {
+    border-left: 3px solid #0ea5e9;
+    background: #f8fafc;
+    border-radius: 6px;
+    padding: 0.45rem 0.6rem;
+
+    strong {
+      display: block;
+      color: #0f172a;
+      font-size: 0.82rem;
+      margin-bottom: 0.15rem;
+    }
+
+    p {
+      margin: 0;
+      color: #334155;
+      line-height: 1.4;
+    }
+  }
+}
+
+.question-hint {
+  color: #64748b;
+  font-size: 0.92rem;
+}
+
+.alert.alert-success {
+  background: #dcfce7;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+  padding: 0.6rem 0.8rem;
+  border-radius: 8px;
+  margin-top: 0.7rem;
+}
+
+.questions-section .alert.alert-error {
+  margin-top: 0.7rem;
+}

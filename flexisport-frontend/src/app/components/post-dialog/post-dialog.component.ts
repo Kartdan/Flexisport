@@ -1,10 +1,7 @@
+import { PostDialogData } from '../../interfaces';
 import { Component, EventEmitter, Input, OnChanges, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
-export interface PostDialogData {
-  title: string;
-  content: string;
-}
 
 @Component({
   selector: 'app-post-dialog',
