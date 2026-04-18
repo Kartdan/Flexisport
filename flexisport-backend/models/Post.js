@@ -4,7 +4,7 @@ const postSchema = new mongoose.Schema({
   title: { type: String, required: true },
   content: { type: String, required: true },
   authorRef: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-  authorName: { type: String, required: true },  // denormalized for display
+  authorName: { type: String, required: true },
   courtRef: { type: mongoose.Schema.Types.ObjectId, ref: "Court", default: null },
   postType: {
     type: String,

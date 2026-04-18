@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { ReactiveFormsModule } from '@angular/forms';
+import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
 
@@ -17,6 +17,15 @@ import { CourtReviewsComponent } from './components/court-reviews/court-reviews.
 import { CourtApprovalComponent } from './components/court-approval/court-approval.component';
 import { PostDialogComponent } from './components/post-dialog/post-dialog.component';
 import { FeedComponent } from './components/feed/feed.component';
+import { CourtsComponent } from './components/courts/courts.component';
+import { CourtDetailComponent } from './components/court-detail/court-detail.component';
+import { PostCreateComponent } from './components/post-create/post-create.component';
+import { TournamentManagementComponent } from './components/tournament-management/tournament-management.component';
+import { SuccessPopupComponent } from './components/success-popup/success-popup.component';
+import { ErrorPopupComponent } from './components/error-popup/error-popup.component';
+import { TournamentsComponent } from './components/tournaments/tournaments.component';
+import { TournamentDetailComponent } from './components/tournament-detail/tournament-detail.component';
+import { ProfileComponent } from './components/profile/profile.component';
 
 @NgModule({
   declarations: [
@@ -30,12 +39,22 @@ import { FeedComponent } from './components/feed/feed.component';
     CourtReviewsComponent,
     CourtApprovalComponent,
     PostDialogComponent,
-    FeedComponent
+    FeedComponent,
+    CourtsComponent,
+    CourtDetailComponent,
+    PostCreateComponent,
+    TournamentManagementComponent,
+    SuccessPopupComponent,
+    ErrorPopupComponent,
+    TournamentsComponent,
+    TournamentDetailComponent,
+    ProfileComponent
   ],
   imports: [
     BrowserModule,
     CommonModule,
     ReactiveFormsModule,
+    FormsModule,
     HttpClientModule,
     RouterModule.forRoot(routes)
   ],

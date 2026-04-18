@@ -1,5 +1,7 @@
 const express = require("express");
 const Court = require("../models/Court");
+const Review = require("../models/Review");
+const Notification = require("../models/Notification");
 const { verifyToken, requireAdmin } = require("../middleware/auth");
 const upload = require("../middleware/upload");
 
@@ -7,10 +9,45 @@ const router = express.Router();
 
 router.get("/", async (req, res) => {
   try {
+    res.set("Cache-Control", "no-store, no-cache, must-revalidate");
+    res.set("Pragma", "no-cache");
+    res.set("Expires", "0");
     const filter = { status: "accepted" };
     if (req.query.sport) filter.sportCategories = req.query.sport;
     const courts = await Court.find(filter).populate("author", "username email fullName");
-    res.json(courts);
+
+    const courtIds = courts.map((court) => court._id);
+    const reviewStats = courtIds.length > 0
+      ? await Review.aggregate([
+          { $match: { court: { $in: courtIds } } },
+          {
+            $group: {
+              _id: "$court",
+              averageRating: { $avg: "$rating" },
+              totalReviews: { $sum: 1 }
+            }
+          }
+        ])
+      : [];
+
+    const statsByCourtId = reviewStats.reduce((acc, stat) => {
+      acc[stat._id.toString()] = {
+        averageRating: Number(stat.averageRating.toFixed(1)),
+        totalReviews: stat.totalReviews
+      };
+      return acc;
+    }, {});
+
+    const courtsWithRatings = courts.map((court) => {
+      const ratingStats = statsByCourtId[court._id.toString()] || { averageRating: 0, totalReviews: 0 };
+      return {
+        ...court.toObject(),
+        averageRating: ratingStats.averageRating,
+        totalReviews: ratingStats.totalReviews
+      };
+    });
+
+    res.json(courtsWithRatings);
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch courts" });
   }
@@ -44,12 +81,31 @@ router.patch("/admin/:id/status", verifyToken, requireAdmin, async (req, res) =>
     if (!["pending", "accepted", "rejected"].includes(status)) {
       return res.status(400).json({ error: "Invalid status" });
     }
-    const court = await Court.findByIdAndUpdate(
-      req.params.id,
-      { status },
-      { new: true }
-    ).populate("author", "username email fullName");
+
+    const court = await Court.findById(req.params.id).populate("author", "username email fullName");
     if (!court) return res.status(404).json({ error: "Court not found" });
+
+    const previousStatus = court.status;
+    court.status = status;
+    await court.save();
+
+    if (previousStatus !== status && court.author?._id) {
+      const statusLabels = {
+        pending: "Pending",
+        accepted: "Approved",
+        rejected: "Rejected"
+      };
+
+      await Notification.create({
+        user: court.author._id,
+        type: "court_status",
+        title: "Court status updated",
+        message: `Your court \"${court.name}\" was ${statusLabels[status] || status}.`,
+        court: court._id,
+        isRead: false
+      });
+    }
+
     res.json(court);
   } catch (err) {
     res.status(500).json({ error: "Failed to update court status" });
@@ -58,6 +114,9 @@ router.patch("/admin/:id/status", verifyToken, requireAdmin, async (req, res) =>
 
 router.get("/:id", async (req, res) => {
   try {
+    res.set("Cache-Control", "no-store, no-cache, must-revalidate");
+    res.set("Pragma", "no-cache");
+    res.set("Expires", "0");
     const court = await Court.findById(req.params.id).populate("author", "username email fullName");
     if (!court) return res.status(404).json({ error: "Court not found" });
     res.json(court);

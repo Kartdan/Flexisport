@@ -1,0 +1,124 @@
+<div class="tournament-detail-page">
+  <app-success-popup
+    [visible]="showSuccessPopup"
+    [title]="successPopupTitle"
+    [message]="successPopupMessage"
+    (closed)="onSuccessPopupClosed()">
+  </app-success-popup>
+
+  <button type="button" class="back-btn" (click)="goBack()">← Back to all tournaments</button>
+
+  <div *ngIf="loading" class="loading">Loading tournament...</div>
+  <div *ngIf="errorMessage" class="alert alert-error">{{ errorMessage }}</div>
+
+  <article *ngIf="!loading && tournament" class="detail-card">
+    <div class="hero" *ngIf="tournament.coverPhoto">
+      <img [src]="tournament.coverPhoto" [alt]="tournament.name" />
+    </div>
+
+    <div class="header">
+      <h1>{{ tournament.name }}</h1>
+      <span class="status">{{ tournament.status | titlecase }}</span>
+    </div>
+
+    <p class="description">{{ tournament.description }}</p>
+
+    <div class="grid">
+      <div><strong>Sport</strong><span>{{ tournament.sport | titlecase }}</span></div>
+      <div><strong>Format</strong><span>{{ tournament.format }}</span></div>
+      <div><strong>Experience level</strong><span>{{ getExperienceLevelLabel(tournament.experienceLevel) }}</span></div>
+      <div><strong>Court</strong><span>{{ getCourtName(tournament.court) }}</span></div>
+      <div><strong>Location</strong><span>{{ getCourtAddress(tournament.court) }}</span></div>
+      <div><strong>Organizer</strong><span>{{ getAuthorName(tournament.author) }}</span></div>
+      <div><strong>Starts</strong><span>{{ tournament.startDate | date: 'MMM d, y, h:mm a' }}</span></div>
+      <div><strong>Ends</strong><span>{{ tournament.endDate | date: 'MMM d, y, h:mm a' }}</span></div>
+      <div><strong>Registration deadline</strong><span>{{ tournament.registrationDeadline | date: 'MMM d, y, h:mm a' }}</span></div>
+      <div><strong>Entry fee</strong><span>{{ tournament.entryFee }} RON</span></div>
+      <div><strong>Participants</strong><span>{{ tournament.registeredParticipants?.length || 0 }} / {{ tournament.maxParticipants }}</span></div>
+      <div *ngIf="tournament.prizes"><strong>Prizes</strong><span>{{ tournament.prizes }}</span></div>
+    </div>
+
+    <section class="registration-section">
+      <div class="registration-actions" *ngIf="isLoggedIn && isPlayer">
+        <button
+          type="button"
+          class="register-btn"
+          [disabled]="registrationLoading || !canRegister"
+          *ngIf="!isRegistered"
+          (click)="registerForTournament()"
+        >
+          {{ registrationLoading ? 'Registering...' : 'Register for Tournament' }}
+        </button>
+
+        <button
+          type="button"
+          class="unregister-btn"
+          [disabled]="registrationLoading"
+          *ngIf="isRegistered"
+          (click)="unregisterFromTournament()"
+        >
+          {{ registrationLoading ? 'Updating...' : 'Unregister' }}
+        </button>
+
+        <p class="registration-hint" *ngIf="!isRegistered && !canRegister && !registrationLoading">
+          Registration is currently closed or tournament is full.
+        </p>
+      </div>
+
+      <div class="registration-hint" *ngIf="isLoggedIn && !isPlayer">
+        Only players can register for tournaments.
+      </div>
+
+      <div class="registration-hint" *ngIf="!isLoggedIn">
+        Please log in as a player to register.
+      </div>
+
+      <div class="alert alert-success" *ngIf="registrationMessage">{{ registrationMessage }}</div>
+      <div class="alert alert-error" *ngIf="registrationError">{{ registrationError }}</div>
+    </section>
+
+    <section class="questions-section">
+      <h2>Ask a question</h2>
+
+      <div *ngIf="!isLoggedIn" class="question-hint">
+        Please log in to ask a question.
+      </div>
+
+      <div class="ask-form" *ngIf="isLoggedIn">
+        <textarea
+          [(ngModel)]="newQuestion"
+          rows="3"
+          placeholder="Ask anything about this tournament..."
+        ></textarea>
+        <button type="button" [disabled]="askingQuestion" (click)="askQuestion()">
+          {{ askingQuestion ? 'Sending...' : 'Send Question' }}
+        </button>
+      </div>
+
+      <div *ngIf="questionErrorMessage" class="alert alert-error">{{ questionErrorMessage }}</div>
+      <div *ngIf="questionSuccessMessage" class="alert alert-success">{{ questionSuccessMessage }}</div>
+
+      <div class="questions-list" *ngIf="questions.length > 0">
+        <article class="question-card" *ngFor="let q of questions">
+          <p class="question-text">{{ q.question }}</p>
+
+          <div class="answers" *ngIf="q._id && (answersByQuestion[q._id]?.length || 0) > 0">
+            <div class="answer" *ngFor="let answer of answersByQuestion[q._id]">
+              <strong>{{ getAnsweredByName(answer.answeredBy) }}</strong>
+              <p>{{ answer.answer }}</p>
+            </div>
+          </div>
+
+          <div class="question-meta">
+            <span>Asked by {{ getAskedByName(q) }}</span>
+            <span>{{ q.createdAt | date: 'MMM d, y, h:mm a' }}</span>
+          </div>
+        </article>
+      </div>
+
+      <div class="question-hint" *ngIf="questions.length === 0">
+        No questions yet. Be the first to ask.
+      </div>
+    </section>
+  </article>
+</div>

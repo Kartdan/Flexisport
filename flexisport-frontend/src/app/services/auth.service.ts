@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { Router } from '@angular/router';
-import { User, AuthResponse } from '../models/models';
+import { User, AuthResponse } from '../interfaces';
 
 @Injectable({
   providedIn: 'root'
@@ -74,5 +74,31 @@ export class AuthService {
     return this.http.patch<User>(`${this.usersUrl}/supervisors/${id}/status`, { status }, {
       headers: this.getAuthHeaders()
     });
+  }
+
+  getMyProfile(): Observable<User> {
+    return this.http.get<User>(`${this.usersUrl}/me`, {
+      headers: this.getAuthHeaders()
+    });
+  }
+
+  updateMyProfile(
+    profile: Pick<User, 'fullName' | 'username' | 'email' | 'preferredSports' | 'personalDescription'>
+  ): Observable<User> {
+    return this.http.put<User>(`${this.usersUrl}/me`, profile, {
+      headers: this.getAuthHeaders()
+    }).pipe(
+      tap((user) => {
+        const currentUser = this.getStoredUser();
+        if (!currentUser) return;
+
+        const mergedUser: User = {
+          ...currentUser,
+          ...user,
+          id: user.id || user._id || currentUser.id || currentUser._id
+        };
+        localStorage.setItem('user', JSON.stringify(mergedUser));
+      })
+    );
   }
 }

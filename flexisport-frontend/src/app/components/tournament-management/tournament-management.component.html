@@ -1,0 +1,404 @@
+<div class="tournament-management-page">
+  <h2>Tournament Management</h2>
+
+  <app-post-dialog
+    [visible]="showPostDialog"
+    [defaultTitle]="postDialogTitle"
+    [defaultContent]="postDialogContent"
+    (confirmed)="onPostDialogConfirmed($event)"
+    (cancelled)="onPostDialogCancelled()">
+  </app-post-dialog>
+
+  <app-success-popup
+    [visible]="showSuccessPopup"
+    [title]="successPopupTitle"
+    [message]="successPopupMessage"
+    (closed)="onSuccessPopupClosed()">
+  </app-success-popup>
+
+  <app-error-popup
+    [visible]="showErrorPopup"
+    [title]="errorPopupTitle"
+    [message]="errorPopupMessage"
+    (closed)="onErrorPopupClosed()">
+  </app-error-popup>
+
+  <div *ngIf="successMessage" class="alert alert-success">{{ successMessage }}</div>
+  <div *ngIf="errorMessage" class="alert alert-error">{{ errorMessage }}</div>
+
+  <button class="btn btn-primary" (click)="toggleForm()" [disabled]="loading">
+    {{ showForm ? '✕ Cancel' : '+ Create Tournament' }}
+  </button>
+
+  <div class="form-section" *ngIf="showForm">
+    <h3>{{ editingId ? 'Edit Tournament' : 'Create New Tournament' }}</h3>
+
+    <form [formGroup]="tournamentForm" (ngSubmit)="onSubmit()" class="tournament-form">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="name">Tournament Name <span class="required">*</span></label>
+          <input
+            id="name"
+            type="text"
+            formControlName="name"
+            class="form-control"
+            placeholder="Enter tournament name"
+          />
+        </div>
+        <div class="form-group">
+          <label for="sport">Sport <span class="required">*</span></label>
+          <select id="sport" formControlName="sport" class="form-control">
+            <option value="">Select sport</option>
+            <option *ngFor="let sport of sports" [value]="sport.slug">
+              {{ sport.emoji }} {{ sport.name }}
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="court">Court <span class="required">*</span></label>
+          <select id="court" formControlName="court" class="form-control">
+            <option value="" disabled>Select court</option>
+            <option *ngFor="let court of courts" [value]="court._id">
+              {{ court.name }}
+            </option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="format">Format <span class="required">*</span></label>
+          <input
+            id="format"
+            type="text"
+            formControlName="format"
+            class="form-control"
+            placeholder="e.g., Single Elimination, Round Robin"
+          />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="experienceLevel">Experience Level <span class="required">*</span></label>
+          <select id="experienceLevel" formControlName="experienceLevel" class="form-control">
+            <option *ngFor="let level of experienceLevelOptions" [value]="level.value">
+              {{ level.label }}
+            </option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="entryFee">Entry Fee (RON) <span class="required">*</span></label>
+          <input
+            id="entryFee"
+            type="number"
+            formControlName="entryFee"
+            class="form-control"
+            min="0"
+            step="1"
+          />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="description">Description <span class="required">*</span></label>
+        <textarea
+          id="description"
+          formControlName="description"
+          class="form-control"
+          placeholder="Tournament description (minimum 10 characters)"
+          rows="3"
+        ></textarea>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="startDate">Start Date & Time <span class="required">*</span></label>
+          <input
+            id="startDate"
+            type="datetime-local"
+            formControlName="startDate"
+            class="form-control"
+          />
+        </div>
+        <div class="form-group">
+          <label for="endDate">End Date & Time <span class="required">*</span></label>
+          <input
+            id="endDate"
+            type="datetime-local"
+            formControlName="endDate"
+            class="form-control"
+          />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="registrationDeadline">Registration Deadline <span class="required">*</span></label>
+          <input
+            id="registrationDeadline"
+            type="datetime-local"
+            formControlName="registrationDeadline"
+            class="form-control"
+          />
+        </div>
+        <div class="form-group">
+          <label for="maxParticipants">Max Participants <span class="required">*</span></label>
+          <input
+            id="maxParticipants"
+            type="number"
+            formControlName="maxParticipants"
+            class="form-control"
+            min="2"
+          />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="prizes">Prizes</label>
+        <textarea
+          id="prizes"
+          formControlName="prizes"
+          class="form-control"
+          placeholder="e.g., 1st: 500 lei, 2nd: 250 lei, 3rd: 100 lei"
+          rows="3"
+        ></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="coverPhoto" title="Recommended: 16:9 aspect ratio (e.g., 1920x1080 px). JPEG format for best compatibility.">
+          Cover Photo (max 1, up to 5 MB)
+        </label>
+        <label for="coverPhoto" class="file-input-label" [class.disabled]="selectedCoverPhoto" title="Recommended: 16:9 aspect ratio (e.g., 1920x1080 px). JPEG format for best compatibility.">+ Upload Cover Photo</label>
+        <input
+          id="coverPhoto"
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          (change)="onCoverPhotoSelected($event)"
+          class="form-control"
+          [disabled]="selectedCoverPhoto"
+        />
+        <div *ngIf="selectedCoverPhoto" class="photo-preview">
+          <img [src]="selectedCoverPhoto" alt="Cover photo preview" />
+          <button type="button" class="btn btn-danger btn-sm remove-photo" (click)="removeCoverPhoto()">
+            ✕ Remove Photo
+          </button>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary" [disabled]="tournamentForm.invalid || loading">
+          {{ editingId ? 'Update Tournament' : 'Create Tournament' }}
+        </button>
+        <button type="button" class="btn btn-secondary" (click)="toggleForm()" [disabled]="loading">
+          Cancel
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div class="tournaments-section" *ngIf="!loading && !(showForm && editingId)">
+    <h3>Your Tournaments</h3>
+
+    <div *ngIf="tournaments.length === 0" class="empty-state">
+      No tournaments yet. Create one to get started!
+    </div>
+
+    <div class="tournaments-list" *ngIf="tournaments.length > 0">
+      <div class="tournament-card" *ngFor="let tournament of tournaments">
+        <div *ngIf="tournament.coverPhoto" class="tournament-cover">
+          <img [src]="tournament.coverPhoto" alt="{{ tournament.name }}" />
+        </div>
+        <div class="tournament-header">
+          <div>
+            <h4>{{ tournament.name }}</h4>
+            <p class="tournament-court">{{ getCourtName(tournament.court) }}</p>
+          </div>
+          <span [ngStyle]="getStatusBadgeStyle(tournament.status)">
+            {{ tournament.status | titlecase }}
+          </span>
+        </div>
+
+        <div class="tournament-details">
+          <div class="detail">
+            <strong>Sport:</strong>
+            <span>{{ getSportName(tournament.sport) }}</span>
+          </div>
+          <div class="detail">
+            <strong>Format:</strong>
+            <span>{{ getFormatLabel(tournament.format) }}</span>
+          </div>
+          <div class="detail">
+            <strong>Experience Level:</strong>
+            <span>{{ getExperienceLevelLabel(tournament.experienceLevel) }}</span>
+          </div>
+          <div class="detail">
+            <strong>When:</strong>
+            <span>{{ tournament.startDate | date: 'MMM d, yyyy h:mm a' }}</span>
+          </div>
+          <div class="detail">
+            <strong>Registration Deadline:</strong>
+            <span>{{ tournament.registrationDeadline | date: 'MMM d, yyyy h:mm a' }}</span>
+          </div>
+          <div class="detail">
+            <strong>Location:</strong>
+            <span>{{ getCourtAddress(tournament.court) }}</span>
+          </div>
+          <div class="detail">
+            <strong>Participants:</strong>
+            <span>{{ tournament.registeredParticipants?.length || 0 }} / {{ tournament.maxParticipants }}</span>
+          </div>
+          <div class="detail">
+            <strong>Entry Fee:</strong>
+            <span>{{ tournament.entryFee }} RON</span>
+          </div>
+          <div class="detail" *ngIf="tournament.prizes">
+            <strong>Prizes:</strong>
+            <span>{{ tournament.prizes }}</span>
+          </div>
+        </div>
+
+        <p class="tournament-description">{{ tournament.description }}</p>
+
+        <div class="tournament-actions">
+          <button class="btn btn-sm btn-primary" (click)="editTournament(tournament)">
+            ✎ Edit
+          </button>
+          <button
+            class="btn btn-sm btn-danger"
+            (click)="deleteTournament(tournament._id)"
+            [disabled]="loading"
+          >
+            🗑 Delete
+          </button>
+          <button
+            class="btn btn-sm btn-secondary"
+            type="button"
+            (click)="toggleTournamentQuestions(tournament._id)"
+          >
+            💬 Questions
+          </button>
+          <button
+            class="btn btn-sm btn-secondary"
+            type="button"
+            (click)="toggleTournamentParticipants(tournament._id)"
+          >
+            👥 Participants
+          </button>
+        </div>
+
+        <div class="participants-panel" *ngIf="expandedParticipantsTournamentId === tournament._id">
+          <div class="participants-empty" *ngIf="(tournament.registeredParticipants?.length || 0) === 0">
+            No registered players yet.
+          </div>
+
+          <div class="participants-list" *ngIf="(tournament.registeredParticipants?.length || 0) > 0">
+            <article class="participant-item" *ngFor="let participant of tournament.registeredParticipants">
+              <p class="participant-name">{{ getParticipantName(participant) }}</p>
+              <p class="participant-meta" *ngIf="getParticipantUsername(participant)">
+                @{{ getParticipantUsername(participant) }}
+              </p>
+              <p class="participant-meta" *ngIf="getParticipantEmail(participant)">
+                {{ getParticipantEmail(participant) }}
+              </p>
+            </article>
+          </div>
+        </div>
+
+        <div class="questions-panel" *ngIf="expandedQuestionsTournamentId === tournament._id">
+          <div class="questions-loading" *ngIf="loadingQuestions">Loading questions...</div>
+
+          <div class="questions-empty" *ngIf="!loadingQuestions && (questionsByTournament[tournament._id || '']?.length || 0) === 0">
+            No questions yet for this tournament.
+          </div>
+
+          <div class="question-item" *ngFor="let q of questionsByTournament[tournament._id || '']">
+            <div class="question-head">
+              <strong>{{ getAskedByName(q.askedBy) }}</strong>
+              <div class="question-head-actions">
+                <span [ngStyle]="getQuestionStatusStyle(q.status)">{{ q.status || 'open' }}</span>
+                <button
+                  class="btn btn-sm btn-secondary edit-question-btn"
+                  type="button"
+                  title="Edit question"
+                  aria-label="Edit question"
+                  *ngIf="editingQuestionId !== q._id && canEditQuestion(q)"
+                  (click)="startEditQuestion(q)"
+                >
+                  ✏️
+                </button>
+              </div>
+            </div>
+
+            <p class="question-text" *ngIf="editingQuestionId !== q._id">
+              {{ q.question }}
+              <span class="edited-badge" *ngIf="isEdited(q)">(edited)</span>
+            </p>
+
+            <div class="answer-form" *ngIf="editingQuestionId === q._id && q._id">
+              <textarea
+                [(ngModel)]="questionEditDrafts[q._id]"
+                rows="2"
+                placeholder="Edit question"
+              ></textarea>
+              <div class="edit-actions">
+                <button class="btn btn-sm btn-primary" type="button" (click)="saveQuestionEdit(tournament._id, q)">Save</button>
+                <button class="btn btn-sm btn-secondary" type="button" (click)="cancelEditQuestion()">Cancel</button>
+              </div>
+            </div>
+
+            <div class="answers-list" *ngIf="q._id && (answersByQuestion[q._id]?.length || 0) > 0">
+              <div class="answer-item" *ngFor="let answer of answersByQuestion[q._id]">
+                <div class="answer-head">
+                  <strong>{{ getAnsweredByName(answer.answeredBy) }}</strong>
+
+                  <button
+                    class="btn btn-sm btn-secondary edit-answer-btn"
+                    type="button"
+                    title="Edit answer"
+                    aria-label="Edit answer"
+                    *ngIf="editingAnswerId !== answer._id && canEditAnswer(answer)"
+                    (click)="startEditAnswer(answer)"
+                  >
+                    ✏️
+                  </button>
+                </div>
+
+                <p *ngIf="editingAnswerId !== answer._id">
+                  {{ answer.answer }}
+                  <span class="edited-badge" *ngIf="isEdited(answer)">(edited)</span>
+                </p>
+
+                <div class="answer-form" *ngIf="editingAnswerId === answer._id && answer._id">
+                  <textarea
+                    [(ngModel)]="answerEditDrafts[answer._id]"
+                    rows="2"
+                    placeholder="Edit answer"
+                  ></textarea>
+                  <div class="edit-actions">
+                    <button class="btn btn-sm btn-primary" type="button" (click)="saveAnswerEdit(tournament._id, q._id, answer)">Save</button>
+                    <button class="btn btn-sm btn-secondary" type="button" (click)="cancelEditAnswer()">Cancel</button>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            <div class="answer-form" *ngIf="q._id && tournament._id">
+              <textarea
+                [(ngModel)]="answerDrafts[q._id]"
+                rows="2"
+                placeholder="Write your response as owner..."
+              ></textarea>
+              <button class="btn btn-sm btn-primary" type="button" (click)="submitAnswer(tournament._id, q._id)">
+                Reply
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="loading">Loading tournaments...</div>
+</div>

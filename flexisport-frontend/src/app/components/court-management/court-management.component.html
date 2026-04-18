@@ -15,7 +15,6 @@
   <div *ngIf="successMessage" class="alert alert-success">{{ successMessage }}</div>
   <div *ngIf="errorMessage" class="alert alert-error">{{ errorMessage }}</div>
 
-  <!-- Court Form -->
   <div class="court-form" *ngIf="showForm">
     <h3>{{ editingCourt ? 'Edit Court' : 'New Court' }}</h3>
     <form [formGroup]="courtForm" (ngSubmit)="saveCourt()">
@@ -101,9 +100,8 @@
       </div>
 
       <div class="form-group">
-        <label>Photos (max 10, up to 5 MB each)</label>
+        <label title="Recommended: 16:9 aspect ratio (e.g., 1280x720 px minimum, 1920x1080 px recommended). JPEG format for best compatibility.">Photos (max 10, up to 5 MB each)</label>
 
-        <!-- Existing photos (edit mode) -->
         <div *ngIf="existingPhotos.length" class="existing-photos">
           <p class="existing-photos-label">Current photos:</p>
           <div class="existing-photos-grid">
@@ -114,8 +112,8 @@
           </div>
         </div>
 
-        <label for="photos" class="file-input-label">+ Add new photos</label>
-        <input id="photos" type="file" accept="image/jpeg,image/png,image/webp" multiple (change)="onPhotosSelected($event)">
+        <label for="photos" class="file-input-label" title="Recommended: 16:9 aspect ratio (e.g., 1280x720 px minimum, 1920x1080 px recommended). JPEG format for best compatibility.">+ Add new photos</label>
+        <input id="photos" type="file" accept="image/jpeg,image/png,image/webp" multiple (change)="onPhotosSelected($event)" title="Recommended: 16:9 aspect ratio">
         <span class="photo-hint">Recommended: 1280 × 720 px (16:9), JPEG. Minimum 800 × 450 px for best display quality.</span>
         <div *ngIf="selectedPhotos.length" class="selected-photos-list">
           <div class="selected-photo-item" *ngFor="let photo of selectedPhotos; let i = index">
@@ -129,12 +127,111 @@
 
       <div class="form-actions">
         <button type="submit" class="btn btn-primary" [disabled]="courtForm.invalid">Save</button>
+        <button type="button" class="btn btn-preview" *ngIf="editingCourt" (click)="toggleDetailPreview()">
+          {{ showDetailPreview ? 'Hide Preview' : 'Preview' }}
+        </button>
         <button type="button" class="btn btn-secondary" (click)="cancelForm()">Cancel</button>
       </div>
     </form>
+
+    <div class="live-preview" *ngIf="editingCourt && showDetailPreview">
+      <h4>Court Detail Preview</h4>
+
+      <div class="court-detail-page">
+        <button type="button" class="back-btn" disabled>← Back to Courts</button>
+
+        <div class="court-detail-container">
+          <div class="photo-gallery">
+            <div class="photo-display" *ngIf="previewPhoto">
+              <img [src]="previewPhoto" [alt]="courtForm.value.name || editingCourt.name" />
+              <div class="photo-nav" *ngIf="previewPhotos.length > 1">
+                <button type="button" class="photo-btn prev" (click)="previousPreviewPhoto()">‹</button>
+                <span class="photo-counter">{{ previewPhotoIndex + 1 }} / {{ previewPhotos.length }}</span>
+                <button type="button" class="photo-btn next" (click)="nextPreviewPhoto()">›</button>
+              </div>
+            </div>
+            <div class="photo-placeholder" *ngIf="!previewPhoto">
+              <span>No photos available</span>
+            </div>
+          </div>
+
+          <div class="court-header">
+            <div>
+              <h1>{{ courtForm.value.name || editingCourt.name }}</h1>
+              <p class="court-address">📍 {{ courtForm.value.address || editingCourt.address }}</p>
+            </div>
+            <span [ngClass]="getPreviewStatusBadgeClass(courtForm.value.operationalStatus)" class="status-badge">
+              {{ getPreviewDetailStatusLabel(courtForm.value.operationalStatus) }}
+            </span>
+          </div>
+
+          <div class="court-info-grid">
+            <div class="info-card">
+              <strong>Price</strong>
+              <p class="price">{{ courtForm.value.pricePerHour }}<span> RON / hour</span></p>
+            </div>
+            <div class="info-card">
+              <strong>Number of Courts</strong>
+              <p>{{ courtForm.value.numberOfCourts }}</p>
+            </div>
+            <div class="info-card">
+              <strong>Surface Type</strong>
+              <p>{{ courtForm.value.surfaceType }}</p>
+            </div>
+            <div class="info-card" *ngIf="courtForm.value.phone">
+              <strong>Phone</strong>
+              <p>{{ courtForm.value.phone }}</p>
+            </div>
+          </div>
+
+          <div class="description-section" *ngIf="courtForm.value.description">
+            <h2>Description</h2>
+            <p>{{ courtForm.value.description }}</p>
+          </div>
+
+          <div class="sports-section" *ngIf="(courtForm.value.sportCategories || []).length > 0">
+            <h2>Sports Available</h2>
+            <div class="sport-tags-large">
+              <span class="sport-tag" *ngFor="let sport of courtForm.value.sportCategories">
+                {{ sport }}
+              </span>
+            </div>
+          </div>
+
+          <div class="facilities-section" *ngIf="(courtForm.value.facilities || []).length > 0">
+            <h2>Facilities</h2>
+            <div class="facility-tags-large">
+              <span class="facility-tag" *ngFor="let facility of courtForm.value.facilities">
+                ✓ {{ facility }}
+              </span>
+            </div>
+          </div>
+
+          <div class="schedules-section" *ngIf="courtForm.value.scheduleStart && courtForm.value.scheduleEnd">
+            <h2>Operating Hours</h2>
+            <div class="schedules-list">
+              <div class="schedule-item" *ngFor="let day of days">
+                <strong>{{ day }}</strong>
+                <span>{{ courtForm.value.scheduleStart }} - {{ courtForm.value.scheduleEnd }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="reviews-section">
+            <h2>Reviews</h2>
+            <div class="no-reviews">
+              No reviews yet. Be the first to review!
+            </div>
+          </div>
+
+          <div class="book-section">
+            <button type="button" class="book-btn" disabled>Book This Court</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <!-- Courts List -->
   <div class="courts-list" *ngIf="!showForm">
     <div *ngIf="courts.length === 0 && !errorMessage" class="empty-state">
       You haven't added any courts yet. Click "+ Add Court" to get started.

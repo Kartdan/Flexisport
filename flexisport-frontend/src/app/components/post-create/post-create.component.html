@@ -1,0 +1,81 @@
+<div class="post-create-page">
+  <div class="post-create-container">
+    <h2>Create a New Post</h2>
+
+    <div *ngIf="successMessage" class="alert alert-success">
+      {{ successMessage }}
+    </div>
+    <div *ngIf="errorMessage" class="alert alert-error">
+      {{ errorMessage }}
+    </div>
+
+    <form [formGroup]="postForm" (ngSubmit)="onSubmit()" class="post-form">
+      <div class="form-group">
+        <label for="title">Post Title <span class="required">*</span></label>
+        <input
+          id="title"
+          type="text"
+          formControlName="title"
+          class="form-control"
+          placeholder="Enter post title"
+          [class.is-invalid]="titleControl?.invalid && titleControl?.touched"
+        />
+        <small class="form-error" *ngIf="titleControl?.invalid && titleControl?.touched">
+          <span *ngIf="titleControl?.errors?.['required']">Title is required</span>
+          <span *ngIf="titleControl?.errors?.['minlength']">Title must be at least 3 characters</span>
+        </small>
+      </div>
+
+      <div class="form-group">
+        <label for="content">Post Content <span class="required">*</span></label>
+        <textarea
+          id="content"
+          formControlName="content"
+          class="form-control"
+          placeholder="What's on your mind? (minimum 10 characters)"
+          rows="6"
+          [class.is-invalid]="contentControl?.invalid && contentControl?.touched"
+        ></textarea>
+        <small class="form-error" *ngIf="contentControl?.invalid && contentControl?.touched">
+          <span *ngIf="contentControl?.errors?.['required']">Content is required</span>
+          <span *ngIf="contentControl?.errors?.['minlength']">Content must be at least 10 characters</span>
+        </small>
+        <small class="form-hint">{{ contentControl?.value?.length || 0 }} characters</small>
+      </div>
+
+      <div class="form-group">
+        <label for="courtRef">Related Court (Optional)</label>
+        <select
+          id="courtRef"
+          formControlName="courtRef"
+          class="form-control"
+        >
+          <option value="">-- No court --</option>
+          <option *ngFor="let court of courts" [value]="court._id">
+            {{ court.name }}
+          </option>
+        </select>
+        <small class="form-hint">Link this post to a specific court</small>
+      </div>
+
+      <div class="form-actions">
+        <button
+          type="submit"
+          class="btn btn-primary"
+          [disabled]="postForm.invalid || loading"
+        >
+          <span *ngIf="!loading">Publish Post</span>
+          <span *ngIf="loading">Publishing...</span>
+        </button>
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="cancel()"
+          [disabled]="loading"
+        >
+          Cancel
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

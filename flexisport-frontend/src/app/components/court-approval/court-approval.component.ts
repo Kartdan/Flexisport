@@ -1,6 +1,6 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CourtService } from '../../services/court.service';
-import { Court, CourtStatus } from '../../models/models';
+import { Court, CourtStatus } from '../../interfaces';
 
 @Component({
   selector: 'app-court-approval',

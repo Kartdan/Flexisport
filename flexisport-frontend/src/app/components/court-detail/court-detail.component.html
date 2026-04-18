@@ -1,0 +1,90 @@
+<div class="court-detail-page">
+  <button class="back-btn" (click)="goBack()">← Back to Courts</button>
+
+  <div *ngIf="loading" class="loading">Loading court details...</div>
+  <div *ngIf="errorMessage" class="alert alert-error">{{ errorMessage }}</div>
+
+  <div class="court-detail-container" *ngIf="!loading && court">
+    <div class="photo-gallery">
+      <div class="photo-display" *ngIf="court.photos && court.photos.length > 0">
+        <img [src]="court.photos[currentPhotoIndex]" [alt]="court.name" />
+        <div class="photo-nav" *ngIf="court.photos.length > 1">
+          <button class="photo-btn prev" (click)="previousPhoto()">‹</button>
+          <span class="photo-counter">{{ currentPhotoIndex + 1 }} / {{ court.photos.length }}</span>
+          <button class="photo-btn next" (click)="nextPhoto()">›</button>
+        </div>
+      </div>
+      <div class="photo-placeholder" *ngIf="!court.photos || court.photos.length === 0">
+        <span>No photos available</span>
+      </div>
+    </div>
+
+    <div class="court-header">
+      <div>
+        <h1>{{ court.name }}</h1>
+        <p class="court-address">📍 {{ court.address }}</p>
+      </div>
+      <span [ngClass]="getStatusBadgeClass(court.operationalStatus)" class="status-badge">
+        {{ getStatusLabel(court.operationalStatus) }}
+      </span>
+    </div>
+
+    <div class="court-info-grid">
+      <div class="info-card">
+        <strong>Price</strong>
+        <p class="price">{{ court.pricePerHour }}<span> RON / hour</span></p>
+      </div>
+      <div class="info-card">
+        <strong>Number of Courts</strong>
+        <p>{{ court.numberOfCourts }}</p>
+      </div>
+      <div class="info-card">
+        <strong>Surface Type</strong>
+        <p>{{ court.surfaceType }}</p>
+      </div>
+      <div class="info-card" *ngIf="court.phone">
+        <strong>Phone</strong>
+        <p>{{ court.phone }}</p>
+      </div>
+    </div>
+
+    <div class="description-section" *ngIf="court.description">
+      <h2>Description</h2>
+      <p>{{ court.description }}</p>
+    </div>
+
+    <div class="sports-section" *ngIf="court.sportCategories && court.sportCategories.length > 0">
+      <h2>Sports Available</h2>
+      <div class="sport-tags-large">
+        <span class="sport-tag" *ngFor="let sport of court.sportCategories">
+          {{ sport }}
+        </span>
+      </div>
+    </div>
+
+    <div class="facilities-section" *ngIf="court.facilities && court.facilities.length > 0">
+      <h2>Facilities</h2>
+      <div class="facility-tags-large">
+        <span class="facility-tag" *ngFor="let facility of court.facilities">
+          ✓ {{ facility }}
+        </span>
+      </div>
+    </div>
+
+    <div class="schedules-section" *ngIf="court.schedules && court.schedules.length > 0">
+      <h2>Operating Hours</h2>
+      <div class="schedules-list">
+        <div class="schedule-item" *ngFor="let schedule of court.schedules">
+          <strong>{{ schedule.day }}</strong>
+          <span>{{ schedule.startTime }} - {{ schedule.endTime }}</span>
+        </div>
+      </div>
+    </div>
+
+    <app-court-reviews *ngIf="court._id" [courtId]="court._id"></app-court-reviews>
+
+    <div class="book-section">
+      <button class="book-btn">Book This Court</button>
+    </div>
+  </div>
+</div>
