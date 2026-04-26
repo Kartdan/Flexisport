@@ -178,6 +178,7 @@
           class="form-control"
           [disabled]="selectedCoverPhoto"
         />
+        <span class="photo-hint">Recommended: 1280 × 720 px (16:9), JPEG. Minimum 800 × 450 px for best display quality.</span>
         <div *ngIf="selectedCoverPhoto" class="photo-preview">
           <img [src]="selectedCoverPhoto" alt="Cover photo preview" />
           <button type="button" class="btn btn-danger btn-sm remove-photo" (click)="removeCoverPhoto()">

@@ -1,7 +1,10 @@
 <div class="court-management">
   <div class="header">
     <h2>My Courts</h2>
-    <button class="btn btn-primary" (click)="openNewForm()" *ngIf="!showForm">+ Add Court</button>
+    <div class="header-actions">
+      <a routerLink="/court-bookers" class="btn btn-secondary">👥 My Bookers</a>
+      <button class="btn btn-primary" (click)="openNewForm()" *ngIf="!showForm">+ Add Court</button>
+    </div>
   </div>
 
   <app-post-dialog
@@ -11,6 +14,13 @@
     (confirmed)="onPostDialogConfirmed($event)"
     (cancelled)="onPostDialogCancelled()">
   </app-post-dialog>
+
+  <app-success-popup
+    [visible]="showBookingRejectedPopup"
+    title="Booking Rejected"
+    message="The booking has been cancelled successfully."
+    (closed)="showBookingRejectedPopup = false"
+  ></app-success-popup>
 
   <div *ngIf="successMessage" class="alert alert-success">{{ successMessage }}</div>
   <div *ngIf="errorMessage" class="alert alert-error">{{ errorMessage }}</div>
@@ -45,6 +55,12 @@
           <label for="pricePerHour">Price per Hour (RON) *</label>
           <input id="pricePerHour" type="number" formControlName="pricePerHour" min="0">
         </div>
+      </div>
+
+      <div class="form-group">
+        <label for="cancellationNoticeHours">Cancellation Notice (hours)</label>
+        <input id="cancellationNoticeHours" type="number" formControlName="cancellationNoticeHours" min="0" placeholder="0 = cancellations allowed any time">
+        <small class="field-hint">Minimum hours before the booking start time that users are allowed to cancel. Set to 0 to allow cancellations at any time.</small>
       </div>
 
       <div class="form-group">
@@ -106,7 +122,7 @@
           <p class="existing-photos-label">Current photos:</p>
           <div class="existing-photos-grid">
             <div class="existing-photo-item" *ngFor="let photo of existingPhotos">
-              <img [src]="photo" alt="Court photo" class="existing-photo-thumb">
+              <img [src]="courtService.getPhotoUrl(photo)" alt="Court photo" class="existing-photo-thumb">
               <button type="button" class="btn-remove-existing" (click)="removeExistingPhoto(photo)" [disabled]="removingPhoto" title="Remove photo">✕</button>
             </div>
           </div>
@@ -143,7 +159,7 @@
         <div class="court-detail-container">
           <div class="photo-gallery">
             <div class="photo-display" *ngIf="previewPhoto">
-              <img [src]="previewPhoto" [alt]="courtForm.value.name || editingCourt.name" />
+              <img [src]="courtService.getPhotoUrl(previewPhoto!)" [alt]="courtForm.value.name || editingCourt.name" />
               <div class="photo-nav" *ngIf="previewPhotos.length > 1">
                 <button type="button" class="photo-btn prev" (click)="previousPreviewPhoto()">‹</button>
                 <span class="photo-counter">{{ previewPhotoIndex + 1 }} / {{ previewPhotos.length }}</span>
@@ -242,6 +258,12 @@
         <h3>{{ court.name }}</h3>
         <span [class]="'status-badge status-' + court.status">{{ court.status }}</span>
         <div class="court-actions">
+          <button class="btn btn-sm btn-block-dates" (click)="toggleBlockedSlots(court)">
+            {{ expandedBlockedCourtId === court._id ? 'Hide Blocked' : '🚫 Block Dates' }}
+          </button>
+          <button class="btn btn-sm btn-bookings" (click)="toggleCourtBookings(court)">
+            {{ expandedBookingsCourtId === court._id ? 'Hide Bookings' : 'View Bookings' }}
+          </button>
           <button class="btn btn-sm btn-edit" (click)="editCourt(court)">Edit</button>
           <button class="btn btn-sm btn-delete" (click)="deleteCourt(court)">Delete</button>
         </div>
@@ -262,8 +284,110 @@
         <p *ngIf="court.description"><strong>Description:</strong> {{ court.description }}</p>
         <p *ngIf="court.facilities.length"><strong>Facilities:</strong> {{ court.facilities.join(', ') }}</p>
         <div *ngIf="court.photos.length" class="court-photos">
-          <img *ngFor="let photo of court.photos" [src]="photo" alt="Court photo" class="court-photo-thumb">
+          <img *ngFor="let photo of court.photos" [src]="courtService.getPhotoUrl(photo)" alt="Court photo" class="court-photo-thumb">
         </div>
+      </div>
+
+      <!-- Blocked Slots panel -->
+      <div class="blocked-slots-panel" *ngIf="expandedBlockedCourtId === court._id">
+        <h4>🚫 Blocked Dates / Times</h4>
+        <p class="blocked-hint">Blocked slots prevent any bookings for the specified date and time. Leave times empty to block the entire day.</p>
+
+        <div class="blocked-add-form">
+          <div class="blocked-form-row">
+            <div class="blocked-form-group" style="max-width:180px;">
+              <label>Date *</label>
+              <input type="date" [(ngModel)]="newBlockDate" [min]="todayString" class="blocked-input" />
+            </div>
+            <div class="blocked-form-group" style="max-width:120px;">
+              <label class="all-day-label">
+                <input type="checkbox" [(ngModel)]="newBlockAllDay" />
+                All Day
+              </label>
+            </div>
+          </div>
+          <div class="blocked-form-row" *ngIf="!newBlockAllDay">
+            <div class="blocked-form-group">
+              <label>Start Time</label>
+              <input type="time" [(ngModel)]="newBlockStartTime" class="blocked-input" />
+            </div>
+            <div class="blocked-form-group">
+              <label>End Time</label>
+              <input type="time" [(ngModel)]="newBlockEndTime" class="blocked-input" />
+            </div>
+          </div>
+          <div class="blocked-form-group">
+            <label>Reason <span class="optional">(optional)</span></label>
+            <input type="text" [(ngModel)]="newBlockReason" placeholder="e.g. Tournament, Private event, Maintenance..." class="blocked-input" />
+          </div>
+          <div *ngIf="newBlockError" class="blocked-error">{{ newBlockError }}</div>
+          <button class="btn btn-sm btn-block-add" (click)="addBlockedSlot()" [disabled]="newBlockSaving">
+            {{ newBlockSaving ? 'Adding...' : '+ Add Block' }}
+          </button>
+        </div>
+
+        <div *ngIf="blockedSlotsLoading" class="blocked-loading">Loading...</div>
+        <div *ngIf="blockedSlotsError" class="blocked-error">{{ blockedSlotsError }}</div>
+
+        <div *ngIf="!blockedSlotsLoading && blockedSlots.length === 0 && !blockedSlotsError" class="blocked-empty">
+          No blocks set. The court is open for all bookings.
+        </div>
+
+        <table *ngIf="!blockedSlotsLoading && blockedSlots.length > 0" class="blocked-table">
+          <thead>
+            <tr><th>Date</th><th>Time</th><th>Reason</th><th></th></tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let slot of blockedSlots">
+              <td>{{ slot.date }}</td>
+              <td>{{ formatBlockedSlotLabel(slot) }}</td>
+              <td>{{ slot.reason || '—' }}</td>
+              <td><button class="btn btn-sm btn-remove-block" (click)="removeBlockedSlot(slot)">✕</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Bookings panel -->
+      <div class="court-bookings-panel" *ngIf="expandedBookingsCourtId === court._id">
+        <div class="bookings-panel-header">
+          <h4>Bookings for {{ court.name }}</h4>
+          <button *ngIf="courtBookings.length > 0" type="button" class="btn btn-sm btn-sort" (click)="toggleBookingsSort()">
+            Start Time {{ bookingsSortAsc ? '▲ Asc' : '▼ Desc' }}
+          </button>
+        </div>
+        <div *ngIf="bookingsLoading" class="bookings-loading">Loading bookings...</div>
+        <div *ngIf="bookingsError" class="bookings-error">{{ bookingsError }}</div>
+        <div *ngIf="!bookingsLoading && courtBookings.length === 0 && !bookingsError" class="bookings-empty">No active bookings.</div>
+        <table *ngIf="!bookingsLoading && courtBookings.length > 0" class="bookings-table">
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>Email</th>
+              <th>Date</th>
+              <th>Start</th>
+              <th>End</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let booking of sortedCourtBookings">
+              <td>{{ getBookingUser(booking) }}</td>
+              <td>{{ getBookingEmail(booking) }}</td>
+              <td>{{ booking.date }}</td>
+              <td>{{ booking.startTime }}</td>
+              <td>{{ booking.endTime }}</td>
+              <td>
+                <button
+                  class="btn btn-sm btn-reject-booking"
+                  (click)="rejectCourtBooking(booking)"
+                  [disabled]="rejectingBookingId === booking._id">
+                  {{ rejectingBookingId === booking._id ? '...' : 'Reject' }}
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>

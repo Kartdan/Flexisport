@@ -1,0 +1,95 @@
+<div class="bookers-page">
+  <h2>Court Bookers</h2>
+  <p class="subtitle">All users who have ever booked one of your courts.</p>
+
+  <div *ngIf="loading" class="loading">Loading bookers...</div>
+  <div *ngIf="errorMessage" class="alert alert-error">{{ errorMessage }}</div>
+
+  <div *ngIf="!loading && bookers.length === 0 && !errorMessage" class="empty-state">
+    No one has booked your courts yet.
+  </div>
+
+  <div class="bookers-list" *ngIf="!loading && bookers.length > 0">
+    <div class="booker-card" *ngFor="let booker of bookers" [class.flagged]="booker.isFlagged">
+      <div class="booker-header">
+        <div class="booker-info">
+          <div class="booker-name">
+            <span class="flag-icon" *ngIf="booker.isFlagged" title="Flagged">🚩</span>
+            <strong>{{ booker.user.fullName || booker.user.username }}</strong>
+          </div>
+          <span class="booker-email">{{ booker.user.email }}</span>
+          <div class="booker-meta">
+            <span>📅 {{ booker.bookingCount }} booking{{ booker.bookingCount !== 1 ? 's' : '' }}</span>
+            <span>Last: {{ booker.lastBooking }}</span>
+          </div>
+          <div class="flag-note" *ngIf="booker.isFlagged && booker.flagNote">
+            <em>Note: {{ booker.flagNote }}</em>
+          </div>
+          <div class="deny-badge" *ngIf="booker.denyBooking">
+            🚫 Booking Denied
+          </div>
+        </div>
+
+        <div class="booker-actions">
+          <!-- Reason input (only shown when not yet flagged) -->
+          <input
+            *ngIf="!booker.isFlagged"
+            type="text"
+            [(ngModel)]="flagNoteInput[booker.user._id]"
+            placeholder="Flag reason (optional)"
+            class="flag-note-input"
+          />
+
+          <div class="action-buttons">
+            <button class="btn-toggle-bookings" (click)="toggleUserBookings(booker.user._id)">
+              {{ expandedUserId === booker.user._id ? 'Hide Bookings' : 'View Bookings' }}
+            </button>
+
+            <button *ngIf="!booker.isFlagged" class="btn-flag" (click)="toggleFlag(booker)" [disabled]="flagging[booker.user._id]">
+              🚩 Flag
+            </button>
+            <button *ngIf="booker.isFlagged" class="btn-unflag" (click)="toggleFlag(booker)" [disabled]="flagging[booker.user._id]">
+              ✅ Unflag
+            </button>
+
+            <button *ngIf="!booker.denyBooking" class="btn-deny" (click)="toggleDeny(booker)" [disabled]="denying[booker.user._id]">
+              🚫 Deny
+            </button>
+            <button *ngIf="booker.denyBooking" class="btn-allow" (click)="toggleDeny(booker)" [disabled]="denying[booker.user._id]">
+              ✅ Allow
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="user-bookings" *ngIf="expandedUserId === booker.user._id">
+        <div *ngIf="bookingsLoading" class="loading-small">Loading bookings...</div>
+        <div *ngIf="!bookingsLoading && userBookings.length === 0" class="empty-bookings">
+          No bookings found.
+        </div>
+        <table class="bookings-table" *ngIf="!bookingsLoading && userBookings.length > 0">
+          <thead>
+            <tr>
+              <th>Court</th>
+              <th>Date</th>
+              <th>Time</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let b of userBookings" [class.cancelled]="b.status === 'cancelled'">
+              <td>{{ getCourtName(b.court) }}</td>
+              <td>{{ b.date }}</td>
+              <td>{{ b.startTime }} – {{ b.endTime }}</td>
+              <td>
+                <span class="status-badge" [class.active]="b.status === 'active'" [class.cancelled]="b.status === 'cancelled'">
+                  {{ b.status }}
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

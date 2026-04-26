@@ -7,7 +7,7 @@
   <div class="court-detail-container" *ngIf="!loading && court">
     <div class="photo-gallery">
       <div class="photo-display" *ngIf="court.photos && court.photos.length > 0">
-        <img [src]="court.photos[currentPhotoIndex]" [alt]="court.name" />
+        <img [src]="courtService.getPhotoUrl(court.photos[currentPhotoIndex])" [alt]="court.name" />
         <div class="photo-nav" *ngIf="court.photos.length > 1">
           <button class="photo-btn prev" (click)="previousPhoto()">‹</button>
           <span class="photo-counter">{{ currentPhotoIndex + 1 }} / {{ court.photos.length }}</span>
@@ -83,8 +83,162 @@
 
     <app-court-reviews *ngIf="court._id" [courtId]="court._id"></app-court-reviews>
 
-    <div class="book-section">
-      <button class="book-btn">Book This Court</button>
+    <div class="cancellation-policy" *ngIf="court.cancellationNoticeHours && court.cancellationNoticeHours > 0">
+      <span class="policy-icon">⚠️</span>
+      <strong>Cancellation Policy:</strong> Cancellations must be made at least {{ court.cancellationNoticeHours }} hour{{ court.cancellationNoticeHours !== 1 ? 's' : '' }} before the booking start time.
     </div>
+    <div class="cancellation-policy free" *ngIf="!court.cancellationNoticeHours || court.cancellationNoticeHours === 0">
+      <span class="policy-icon">✅</span>
+      <strong>Free Cancellation:</strong> You can cancel this booking at any time.
+    </div>
+
+    <div class="book-section">
+      <button class="book-btn" (click)="openBookingModal()" *ngIf="authService.isLoggedIn()">Book This Court</button>
+      <p class="login-to-book" *ngIf="!authService.isLoggedIn()">
+        <a routerLink="/login">Log in</a> to book this court.
+      </p>
+    </div>
+  </div>
+</div>
+
+<div class="booking-modal-overlay" *ngIf="showBookingModal" (click)="closeBookingModal()">
+  <div class="booking-modal" (click)="$event.stopPropagation()">
+    <div class="booking-modal-header">
+      <h2>Book {{ court?.name }}</h2>
+      <button class="close-btn" type="button" (click)="closeBookingModal()">✕</button>
+    </div>
+
+    <div *ngIf="bookingResult" class="booking-result">
+      <div class="result-created" *ngIf="bookingResult.created.length > 0">
+        <p class="result-title">✅ {{ bookingResult.created.length === 1 ? 'Booking confirmed!' : bookingResult.created.length + ' bookings confirmed!' }}</p>
+        <ul class="result-dates" *ngIf="bookingResult.created.length > 1">
+          <li *ngFor="let b of bookingResult.created">{{ b.date }} &nbsp;·&nbsp; {{ b.startTime }}–{{ b.endTime }}</li>
+        </ul>
+      </div>
+      <div class="result-skipped" *ngIf="bookingResult.skipped.length > 0">
+        <p>⚠️ {{ bookingResult.skipped.length }} date{{ bookingResult.skipped.length !== 1 ? 's' : '' }} could not be booked:</p>
+        <ul>
+          <li *ngFor="let s of bookingResult.skipped">{{ s.date }} — {{ s.reason }}</li>
+        </ul>
+      </div>
+      <p class="result-none" *ngIf="bookingResult.created.length === 0">❌ No bookings could be created. All selected dates are fully booked.</p>
+      <p class="result-hint">You can view your bookings in <strong>My Bookings</strong>.</p>
+      <button class="btn-secondary" type="button" (click)="closeBookingModal()">Close</button>
+    </div>
+
+    <form *ngIf="!bookingResult" class="booking-form" (ngSubmit)="submitBooking()">
+      <div class="form-group">
+        <label for="bookingDate">Date</label>
+        <input
+          id="bookingDate"
+          type="date"
+          [(ngModel)]="bookingDate"
+          name="bookingDate"
+          [min]="todayString"
+          (change)="onDateChange()"
+          required
+        />
+      </div>
+
+      <!-- Slot calendar -->
+      <div class="slot-calendar" *ngIf="bookingDate">
+        <div class="slot-legend">
+          <span><span class="legend-dot legend-available"></span>Available</span>
+          <span><span class="legend-dot legend-partial"></span>Partial</span>
+          <span><span class="legend-dot legend-full"></span>Full</span>
+          <span><span class="legend-dot legend-blocked"></span>Blocked</span>
+          <span><span class="legend-dot legend-selected"></span>Selected</span>
+        </div>
+        <div class="slot-loading" *ngIf="slotsLoading">Loading slots...</div>
+        <div class="slot-grid" *ngIf="!slotsLoading">
+          <div
+            *ngFor="let slot of timeSlots"
+            class="slot"
+            [class.slot--available]="!isSlotSelected(slot) && getSlotStatus(slot) === 'available'"
+            [class.slot--partial]="!isSlotSelected(slot) && getSlotStatus(slot) === 'partial'"
+            [class.slot--full]="getSlotStatus(slot) === 'full'"
+            [class.slot--blocked]="!isSlotSelected(slot) && getSlotStatus(slot) === 'blocked'"
+            [class.slot--selected]="isSlotSelected(slot)"
+            (click)="onSlotClick(slot)"
+            [title]="slot.start + ' – ' + slot.end"
+          >
+            {{ slot.start }}
+          </div>
+        </div>
+        <p class="slot-hint" *ngIf="!slotsLoading">Click a slot to set start time · Click a later slot to extend</p>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="bookingStart">Start Time</label>
+          <input
+            id="bookingStart"
+            type="time"
+            [(ngModel)]="bookingStartTime"
+            name="bookingStartTime"
+            (change)="onBookingTimeChange()"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label for="bookingEnd">End Time</label>
+          <input
+            id="bookingEnd"
+            type="time"
+            [(ngModel)]="bookingEndTime"
+            name="bookingEndTime"
+            (change)="onBookingTimeChange()"
+            required
+          />
+        </div>
+      </div>
+
+      <div class="availability-info" *ngIf="availabilityChecking">
+        Checking availability...
+      </div>
+      <div class="availability-info available" *ngIf="availabilityInfo && !availabilityChecking && availabilityInfo.available > 0">
+        ✅ {{ availabilityInfo.available }} of {{ availabilityInfo.total }} court(s) available
+      </div>
+      <div class="availability-info unavailable" *ngIf="availabilityInfo && !availabilityChecking && availabilityInfo.available === 0">
+        ❌ All courts are fully booked for this time slot
+      </div>
+
+      <!-- Repeat weekly -->
+      <div class="repeat-section">
+        <label class="repeat-toggle">
+          <input type="checkbox" [(ngModel)]="repeatEnabled" name="repeatEnabled" />
+          <span>Repeat weekly</span>
+        </label>
+        <div class="repeat-options" *ngIf="repeatEnabled">
+          <div class="repeat-count-row">
+            <label for="cdRepeatWeeks">For</label>
+            <input id="cdRepeatWeeks" type="number" [(ngModel)]="repeatWeeks" name="repeatWeeks" min="2" max="12" class="repeat-input" />
+            <span>weeks</span>
+          </div>
+          <div class="repeat-dates-preview" *ngIf="bookingDate && repeatWeeks > 0">
+            <span class="repeat-preview-label">Dates:</span>
+            <div class="repeat-date-chips">
+              <span class="repeat-chip" *ngFor="let d of getRepeatDates()">{{ d }}</span>
+            </div>
+          </div>
+          <div class="repeat-cost" *ngIf="getBookingHours() > 0">
+            {{ repeatWeeks }} × {{ getBookingHours() }}h × {{ court?.pricePerHour }} RON = <strong>{{ getTotalCost() }} RON</strong>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="bookingError" class="booking-error">{{ bookingError }}</div>
+
+      <div class="form-actions">
+        <button
+          type="submit"
+          class="btn-book"
+          [disabled]="bookingLoading || (availabilityInfo !== null && availabilityInfo.available === 0)"
+        >
+          {{ bookingLoading ? 'Booking...' : (repeatEnabled ? 'Book ' + repeatWeeks + ' weeks' : 'Confirm Booking') }}
+        </button>
+        <button type="button" class="btn-secondary" (click)="closeBookingModal()">Cancel</button>
+      </div>
+    </form>
   </div>
 </div>

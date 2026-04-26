@@ -9,8 +9,15 @@ import { AuthService } from './auth.service';
 })
 export class CourtService {
   private apiUrl = 'http://localhost:5000/api/courts';
+  private baseUrl = 'http://localhost:5000';
 
   constructor(private http: HttpClient, private authService: AuthService) {}
+
+  getPhotoUrl(photo: string): string {
+    if (!photo) return '';
+    if (photo.startsWith('data:') || photo.startsWith('http')) return photo;
+    return `${this.baseUrl}${photo}`;
+  }
 
   private getAuthHeaders(): HttpHeaders {
     return new HttpHeaders({ Authorization: `Bearer ${this.authService.getToken()}` });
@@ -76,5 +83,26 @@ export class CourtService {
     return this.http.post<Court>(`${this.apiUrl}/${courtId}/photos`, formData, {
       headers: new HttpHeaders({ Authorization: `Bearer ${this.authService.getToken()}` })
     });
+  }
+
+  getBlockedSlots(courtId: string): Observable<import('../interfaces').BlockedSlot[]> {
+    return this.http.get<import('../interfaces').BlockedSlot[]>(
+      `${this.apiUrl}/${courtId}/blocked-slots`,
+      { headers: this.getAuthHeaders() }
+    );
+  }
+
+  addBlockedSlot(courtId: string, slot: { date: string; startTime?: string; endTime?: string; reason?: string }): Observable<import('../interfaces').BlockedSlot> {
+    return this.http.post<import('../interfaces').BlockedSlot>(
+      `${this.apiUrl}/${courtId}/blocked-slots`, slot,
+      { headers: this.getAuthHeaders() }
+    );
+  }
+
+  deleteBlockedSlot(courtId: string, slotId: string): Observable<{ message: string }> {
+    return this.http.delete<{ message: string }>(
+      `${this.apiUrl}/${courtId}/blocked-slots/${slotId}`,
+      { headers: this.getAuthHeaders() }
+    );
   }
 }

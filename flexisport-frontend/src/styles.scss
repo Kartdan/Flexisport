@@ -1,1 +1,86 @@
 /* You can add global styles to this file, and also import other style files */
+@use 'variables' as *;
+
+// Emit all design tokens as CSS custom properties so every component
+// can use them via var(--color-primary) etc. without any imports.
+:root {
+  // Brand
+  --color-primary:          #{$color-primary};
+  --color-primary-hover:    #{$color-primary-hover};
+  --color-primary-dark:     #{$color-primary-dark};
+  --color-primary-tint:     #{$color-primary-tint};
+  --color-primary-shadow:   #{$color-primary-shadow};
+  --color-primary-focus:    #{$color-primary-focus};
+
+  // Text
+  --color-text-primary:     #{$color-text-primary};
+  --color-text-secondary:   #{$color-text-secondary};
+  --color-text-muted:       #{$color-text-muted};
+  --color-text-subtle:      #{$color-text-subtle};
+  --color-text-placeholder: #{$color-text-placeholder};
+  --color-text-disabled:    #{$color-text-disabled};
+  --color-text-hint:        #{$color-text-hint};
+  --color-text-inverse:     #{$color-text-inverse};
+
+  // Surface
+  --color-bg-page:          #{$color-bg-page};
+  --color-bg-card:          #{$color-bg-card};
+  --color-bg-subtle:        #{$color-bg-subtle};
+  --color-bg-hover:         #{$color-bg-hover};
+  --color-bg-input:         #{$color-bg-input};
+
+  // Border
+  --color-border-light:     #{$color-border-light};
+  --color-border-medium:    #{$color-border-medium};
+  --color-border-strong:    #{$color-border-strong};
+
+  // Success
+  --color-success:          #{$color-success};
+  --color-success-text:     #{$color-success-text};
+  --color-success-bg:       #{$color-success-bg};
+  --color-success-border:   #{$color-success-border};
+
+  // Error
+  --color-error:            #{$color-error};
+  --color-error-text:       #{$color-error-text};
+  --color-error-bg:         #{$color-error-bg};
+  --color-error-border:     #{$color-error-border};
+
+  // Warning
+  --color-warning:          #{$color-warning};
+  --color-warning-text:     #{$color-warning-text};
+  --color-warning-bg:       #{$color-warning-bg};
+  --color-warning-border:   #{$color-warning-border};
+
+  // Info
+  --color-info:             #{$color-info};
+  --color-info-text:        #{$color-info-text};
+  --color-info-bg:          #{$color-info-bg};
+  --color-info-border:      #{$color-info-border};
+
+  // Dark UI
+  --color-dark-900:         #{$color-dark-900};
+  --color-dark-800:         #{$color-dark-800};
+  --color-dark-700:         #{$color-dark-700};
+  --color-dark-600:         #{$color-dark-600};
+  --color-dark-500:         #{$color-dark-500};
+  --color-dark-400:         #{$color-dark-400};
+
+  // Overlays
+  --overlay-light:          #{$overlay-light};
+  --overlay-medium:         #{$overlay-medium};
+  --overlay-strong:         #{$overlay-strong};
+  --overlay-modal:          #{$overlay-modal};
+
+  // Slot calendar
+  --color-slot-available:   #{$color-slot-available};
+  --color-slot-partial:     #{$color-slot-partial};
+  --color-slot-full:        #{$color-slot-full};
+  --color-slot-selected:    #{$color-primary};
+
+  // Radius
+  --radius-sm:  #{$radius-sm};
+  --radius-md:  #{$radius-md};
+  --radius-lg:  #{$radius-lg};
+  --radius-pill:#{$radius-pill};
+}

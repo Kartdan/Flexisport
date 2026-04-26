@@ -4,7 +4,8 @@ import { CourtService } from '../../services/court.service';
 import { SportService } from '../../services/sport.service';
 import { PostService } from '../../services/post.service';
 import { AuthService } from '../../services/auth.service';
-import { Court, Sport } from '../../interfaces';
+import { BookingService } from '../../services/booking.service';
+import { Court, Sport, Booking, BlockedSlot } from '../../interfaces';
 import { PostDialogData } from '../../interfaces';
 
 @Component({
@@ -34,6 +35,13 @@ export class CourtManagementComponent implements OnInit {
   private pendingPostType: 'court_published' | 'status_update' = 'court_published';
   private pendingCourtId: string | null = null;
 
+  // Bookings panel
+  expandedBookingsCourtId: string | null = null;
+  courtBookings: Booking[] = [];
+  bookingsLoading = false;
+  bookingsError = '';
+  bookingsSortAsc = true;
+
   private originalOperationalStatus = 'open';
 
   surfaceTypes = ['grass', 'clay', 'synthetic', 'hardcourt', 'indoor', 'sand', 'parquet', 'other'];
@@ -47,10 +55,11 @@ export class CourtManagementComponent implements OnInit {
   days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
   constructor(
-    private courtService: CourtService,
+    public courtService: CourtService,
     private sportService: SportService,
     private postService: PostService,
     private authService: AuthService,
+    private bookingService: BookingService,
     private fb: FormBuilder,
     private cdr: ChangeDetectorRef
   ) {
@@ -74,6 +83,7 @@ export class CourtManagementComponent implements OnInit {
       surfaceType: ['other'],
       facilities: [[]],
       operationalStatus: ['open'],
+      cancellationNoticeHours: [0, [Validators.min(0)]],
       scheduleStart: ['08:00'],
       scheduleEnd: ['22:00']
     });
@@ -125,6 +135,7 @@ export class CourtManagementComponent implements OnInit {
       surfaceType: court.surfaceType,
       facilities: court.facilities,
       operationalStatus: court.operationalStatus || 'open',
+      cancellationNoticeHours: court.cancellationNoticeHours ?? 0,
       scheduleStart: court.schedules?.[0]?.startTime || '08:00',
       scheduleEnd: court.schedules?.[0]?.endTime || '22:00'
     });
@@ -223,6 +234,7 @@ export class CourtManagementComponent implements OnInit {
       surfaceType: val.surfaceType,
       facilities: val.facilities,
       operationalStatus: val.operationalStatus,
+      cancellationNoticeHours: val.cancellationNoticeHours ?? 0,
       schedules: this.days.map(day => ({
         day,
         startTime: val.scheduleStart,
@@ -404,5 +416,170 @@ export class CourtManagementComponent implements OnInit {
       reader.onerror = () => reject(new Error('Failed to read file preview'));
       reader.readAsDataURL(file);
     });
+  }
+
+  toggleCourtBookings(court: Court): void {
+    if (this.expandedBookingsCourtId === court._id) {
+      this.expandedBookingsCourtId = null;
+      this.courtBookings = [];
+      return;
+    }
+    this.expandedBookingsCourtId = court._id!;
+    this.courtBookings = [];
+    this.bookingsLoading = true;
+    this.bookingsError = '';
+    this.bookingService.getCourtBookings(court._id!).subscribe({
+      next: (data) => {
+        this.courtBookings = data;
+        this.bookingsLoading = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.bookingsError = 'Failed to load bookings.';
+        this.bookingsLoading = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  getBookingUser(booking: Booking): string {
+    if (typeof booking.user === 'string') return booking.user;
+    return booking.user.fullName || booking.user.username;
+  }
+
+  get sortedCourtBookings(): Booking[] {
+    return [...this.courtBookings].sort((a, b) => {
+      const cmp = (a.date + a.startTime).localeCompare(b.date + b.startTime);
+      return this.bookingsSortAsc ? cmp : -cmp;
+    });
+  }
+
+  toggleBookingsSort(): void {
+    this.bookingsSortAsc = !this.bookingsSortAsc;
+  }
+
+  getBookingEmail(booking: Booking): string {
+    if (typeof booking.user === 'string') return '';
+    return booking.user.email || '';
+  }
+
+  rejectingBookingId: string | null = null;
+
+  showBookingRejectedPopup = false;
+
+  rejectCourtBooking(booking: Booking): void {
+    if (!booking._id) return;
+    this.rejectingBookingId = booking._id;
+    this.bookingService.cancelBooking(booking._id).subscribe({
+      next: () => {
+        this.courtBookings = this.courtBookings.filter(b => b._id !== booking._id);
+        this.rejectingBookingId = null;
+        this.showBookingRejectedPopup = true;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.rejectingBookingId = null;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  // ---- Blocked Slots ----
+  expandedBlockedCourtId: string | null = null;
+  blockedSlots: BlockedSlot[] = [];
+  blockedSlotsLoading = false;
+  blockedSlotsError = '';
+
+  // Form state
+  newBlockDate = '';
+  newBlockStartTime = '';
+  newBlockEndTime = '';
+  newBlockReason = '';
+  newBlockAllDay = false;
+  newBlockSaving = false;
+  newBlockError = '';
+
+  todayString = new Date().toISOString().split('T')[0];
+
+  toggleBlockedSlots(court: Court): void {
+    if (this.expandedBlockedCourtId === court._id) {
+      this.expandedBlockedCourtId = null;
+      this.blockedSlots = [];
+      return;
+    }
+    this.expandedBlockedCourtId = court._id!;
+    this.blockedSlots = [];
+    this.blockedSlotsLoading = true;
+    this.blockedSlotsError = '';
+    this.newBlockDate = '';
+    this.newBlockStartTime = '';
+    this.newBlockEndTime = '';
+    this.newBlockReason = '';
+    this.newBlockAllDay = false;
+    this.newBlockError = '';
+    this.courtService.getBlockedSlots(court._id!).subscribe({
+      next: (data) => { this.blockedSlots = data; this.blockedSlotsLoading = false; this.cdr.detectChanges(); },
+      error: () => { this.blockedSlotsError = 'Failed to load blocked slots.'; this.blockedSlotsLoading = false; this.cdr.detectChanges(); }
+    });
+  }
+
+  addBlockedSlot(): void {
+    if (!this.expandedBlockedCourtId || !this.newBlockDate) {
+      this.newBlockError = 'Date is required.';
+      return;
+    }
+    if (!this.newBlockAllDay && (this.newBlockStartTime || this.newBlockEndTime)) {
+      if (!this.newBlockStartTime || !this.newBlockEndTime) {
+        this.newBlockError = 'Provide both start and end time, or tick All Day.';
+        return;
+      }
+      if (this.newBlockStartTime >= this.newBlockEndTime) {
+        this.newBlockError = 'Start time must be before end time.';
+        return;
+      }
+    }
+    this.newBlockSaving = true;
+    this.newBlockError = '';
+    const payload: { date: string; startTime?: string; endTime?: string; reason?: string } = { date: this.newBlockDate };
+    if (!this.newBlockAllDay && this.newBlockStartTime && this.newBlockEndTime) {
+      payload.startTime = this.newBlockStartTime;
+      payload.endTime = this.newBlockEndTime;
+    }
+    if (this.newBlockReason) payload.reason = this.newBlockReason;
+    this.courtService.addBlockedSlot(this.expandedBlockedCourtId, payload).subscribe({
+      next: (slot) => {
+        this.blockedSlots = [...this.blockedSlots, slot].sort((a, b) =>
+          (a.date + (a.startTime || '')).localeCompare(b.date + (b.startTime || ''))
+        );
+        this.newBlockDate = '';
+        this.newBlockStartTime = '';
+        this.newBlockEndTime = '';
+        this.newBlockReason = '';
+        this.newBlockAllDay = false;
+        this.newBlockSaving = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.newBlockError = err?.error?.error || 'Failed to add blocked slot.';
+        this.newBlockSaving = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  removeBlockedSlot(slot: BlockedSlot): void {
+    if (!this.expandedBlockedCourtId || !slot._id) return;
+    this.courtService.deleteBlockedSlot(this.expandedBlockedCourtId, slot._id).subscribe({
+      next: () => {
+        this.blockedSlots = this.blockedSlots.filter(s => s._id !== slot._id);
+        this.cdr.detectChanges();
+      },
+      error: () => {}
+    });
+  }
+
+  formatBlockedSlotLabel(slot: BlockedSlot): string {
+    if (!slot.startTime) return 'All day';
+    return `${slot.startTime} – ${slot.endTime}`;
   }
 }

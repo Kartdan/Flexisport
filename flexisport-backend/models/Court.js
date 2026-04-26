@@ -70,7 +70,13 @@ const courtSchema = new mongoose.Schema({
     }
   ],
 
-  createdAt: { type: Date, default: Date.now }
+  createdAt: { type: Date, default: Date.now },
+
+  cancellationNoticeHours: {
+    type: Number,
+    default: 0,
+    min: 0
+  }
 
 }, { collection: "courts" });
 
