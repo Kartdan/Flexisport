@@ -1,0 +1,173 @@
+.user-management {
+  padding: 2rem;
+  max-width: 1100px;
+  margin: 0 auto;
+
+  h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 1.25rem;
+    color: #1a1a1a;
+  }
+
+  .filters {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.25rem;
+
+    .search-input {
+      flex: 1;
+      min-width: 200px;
+      padding: 0.5rem 0.75rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      outline: none;
+      &:focus { border-color: #00d1b2; }
+    }
+
+    .role-filter {
+      padding: 0.5rem 0.75rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      outline: none;
+      background: #fff;
+      cursor: pointer;
+      &:focus { border-color: #00d1b2; }
+    }
+
+    .btn-search {
+      background: #00d1b2;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 0.5rem 1.25rem;
+      cursor: pointer;
+      font-size: 0.9rem;
+      &:hover { background: #00b89c; }
+    }
+  }
+
+  .alert {
+    padding: 0.65rem 1rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+    &.alert-success { background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7; }
+    &.alert-error   { background: #ffebee; color: #c62828; border: 1px solid #ef9a9a; }
+  }
+
+  .loading-msg, .empty-state { color: #888; font-size: 0.95rem; padding: 1rem 0; }
+
+  .users-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+    background: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+
+    thead tr {
+      background: #f4f6f8;
+    }
+
+    th {
+      padding: 0.6rem 0.85rem;
+      text-align: left;
+      font-weight: 700;
+      color: #333;
+      border-bottom: 2px solid #e0e0e0;
+    }
+
+    td {
+      padding: 0.55rem 0.85rem;
+      border-bottom: 1px solid #f0f0f0;
+      color: #444;
+      vertical-align: middle;
+    }
+
+    tr:last-child td { border-bottom: none; }
+
+    tr.row-suspended td { color: #aaa; background: #fafafa; }
+
+    .username-cell { color: #888; }
+    .date-cell { white-space: nowrap; color: #999; font-size: 0.82rem; }
+  }
+
+  // Role badges
+  .role-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    &.role-admin      { background: #fce4ec; color: #c62828; }
+    &.role-supervisor { background: #e3f2fd; color: #1565c0; }
+    &.role-owner      { background: #fff8e1; color: #e65100; }
+    &.role-player     { background: #e8f5e9; color: #2e7d32; }
+  }
+
+  // Status badges
+  .status-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    &.status-active    { background: #e8f5e9; color: #2e7d32; }
+    &.status-suspended { background: #ffebee; color: #c62828; }
+  }
+
+  // Role edit UI
+  .role-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex-wrap: nowrap;
+
+    .role-select {
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      padding: 2px 4px;
+      font-size: 0.82rem;
+      outline: none;
+      &:focus { border-color: #00d1b2; }
+    }
+  }
+
+  .actions-cell {
+    white-space: nowrap;
+  }
+
+  .self-label {
+    font-size: 0.8rem;
+    color: #aaa;
+    font-style: italic;
+  }
+
+  // Buttons
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.82rem;
+    font-weight: 600;
+    padding: 0.35rem 0.75rem;
+    transition: background 0.15s;
+
+    &.btn-xs { padding: 2px 5px; font-size: 0.75rem; }
+    &.btn-sm { padding: 0.3rem 0.65rem; }
+
+    &.btn-edit-role  { background: #f5f5f5; color: #555; border: 1px solid #ddd; &:hover { background: #e0e0e0; } }
+    &.btn-save-role  { background: #00d1b2; color: #fff; &:hover { background: #00b89c; } }
+    &.btn-cancel-role{ background: #f5f5f5; color: #555; border: 1px solid #ddd; &:hover { background: #e0e0e0; } }
+    &.btn-suspend    { background: #fff3e0; color: #e65100; border: 1px solid #ffcc80; &:hover { background: #ffe0b2; } }
+    &.btn-unsuspend  { background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7; &:hover { background: #c8e6c9; } }
+  }
+}

@@ -144,10 +144,11 @@ router.patch("/:id/publication-status", verifyToken, async (req, res) => {
       });
     }
 
-    const populatedTournament = await updatedTournament
-      .populate("author", "fullName username")
-      .populate("court", "name address")
-      .populate("registeredParticipants", "fullName username");
+    const populatedTournament = await updatedTournament.populate([
+      { path: "author", select: "fullName username" },
+      { path: "court", select: "name address" },
+      { path: "registeredParticipants", select: "fullName username" }
+    ]);
 
     res.json(populatedTournament);
   } catch (err) {

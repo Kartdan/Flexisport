@@ -1,6 +1,7 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CourtService } from '../../services/court.service';
-import { Court, CourtStatus } from '../../interfaces';
+import { BookingService } from '../../services/booking.service';
+import { Court, CourtStatus, Booking } from '../../interfaces';
 
 @Component({
   selector: 'app-court-approval',
@@ -14,7 +15,12 @@ export class CourtApprovalComponent implements OnInit {
   successMessage = '';
   readonly CourtStatus = CourtStatus;
 
-  constructor(private courtService: CourtService, private cdr: ChangeDetectorRef) {}
+  expandedBookingsCourtId: string | null = null;
+  courtBookings: Booking[] = [];
+  bookingsLoading = false;
+  bookingsError = '';
+
+  constructor(private courtService: CourtService, private bookingService: BookingService, private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.loadCourts();
@@ -59,5 +65,34 @@ export class CourtApprovalComponent implements OnInit {
   getAuthorName(court: Court): string {
     if (typeof court.author === 'string') return court.author;
     return court.author?.fullName || court.author?.username || 'Unknown';
+  }
+
+  toggleCourtBookings(court: Court): void {
+    if (this.expandedBookingsCourtId === court._id) {
+      this.expandedBookingsCourtId = null;
+      this.courtBookings = [];
+      return;
+    }
+    this.expandedBookingsCourtId = court._id!;
+    this.courtBookings = [];
+    this.bookingsLoading = true;
+    this.bookingsError = '';
+    this.bookingService.getCourtBookings(court._id!).subscribe({
+      next: (data) => {
+        this.courtBookings = data;
+        this.bookingsLoading = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.bookingsError = 'Failed to load bookings.';
+        this.bookingsLoading = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  getBookingUser(booking: Booking): string {
+    if (typeof booking.user === 'string') return booking.user;
+    return booking.user.fullName || booking.user.username;
   }
 }

@@ -1,0 +1,48 @@
+<div class="bookings-page">
+  <h1>My Bookings</h1>
+
+  <div *ngIf="loading" class="loading">Loading your bookings...</div>
+  <div *ngIf="errorMessage" class="alert alert-error">{{ errorMessage }}</div>
+
+  <div *ngIf="!loading && bookings.length === 0 && !errorMessage" class="empty-state">
+    <p>You have no active bookings.</p>
+    <a routerLink="/courts" class="browse-link">Browse courts</a>
+  </div>
+
+  <div *ngIf="!loading && bookings.length > 0" class="bookings-list">
+    <div class="booking-card" *ngFor="let booking of bookings">
+      <div class="booking-info">
+        <h3>{{ getCourtName(booking.court) }}</h3>
+        <p class="booking-address">📍 {{ getCourtAddress(booking.court) }}</p>
+        <div class="booking-meta">
+          <span>📅 {{ booking.date }}</span>
+          <span>🕐 {{ booking.startTime }} – {{ booking.endTime }}</span>
+          <span class="booking-price">
+            💰 {{ calculatePrice(booking) }} RON
+          </span>
+        </div>
+      </div>
+      <button
+        class="cancel-btn"
+        (click)="cancelBooking(booking)"
+        [disabled]="cancellingId === booking._id"
+      >
+        {{ cancellingId === booking._id ? 'Cancelling...' : 'Cancel' }}
+      </button>
+    </div>
+  </div>
+
+  <app-success-popup
+    [visible]="showSuccessPopup"
+    title="Booking Cancelled"
+    message="Your booking has been cancelled successfully."
+    (closed)="showSuccessPopup = false"
+  ></app-success-popup>
+
+  <app-error-popup
+    [visible]="showErrorPopup"
+    title="Cannot Cancel Booking"
+    [message]="errorPopupMessage"
+    (closed)="showErrorPopup = false"
+  ></app-error-popup>
+</div>

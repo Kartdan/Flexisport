@@ -26,6 +26,9 @@ import { ErrorPopupComponent } from './components/error-popup/error-popup.compon
 import { TournamentsComponent } from './components/tournaments/tournaments.component';
 import { TournamentDetailComponent } from './components/tournament-detail/tournament-detail.component';
 import { ProfileComponent } from './components/profile/profile.component';
+import { MyBookingsComponent } from './components/my-bookings/my-bookings.component';
+import { CourtBookersComponent } from './components/court-bookers/court-bookers.component';
+import { AdminUserManagementComponent } from './components/admin-user-management/admin-user-management.component';
 
 @NgModule({
   declarations: [
@@ -48,7 +51,10 @@ import { ProfileComponent } from './components/profile/profile.component';
     ErrorPopupComponent,
     TournamentsComponent,
     TournamentDetailComponent,
-    ProfileComponent
+    ProfileComponent,
+    MyBookingsComponent,
+    CourtBookersComponent,
+    AdminUserManagementComponent
   ],
   imports: [
     BrowserModule,

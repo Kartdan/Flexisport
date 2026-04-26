@@ -57,6 +57,7 @@ export interface User {
   preferredSports?: string[];
   gamesPlayedBySport?: { [sport: string]: number };
   personalDescription?: string;
+  suspended?: boolean;
   createdAt?: Date;
 }
 
@@ -81,6 +82,7 @@ export interface Court {
   schedules: Schedule[];
   status?: string;
   operationalStatus?: string;
+  cancellationNoticeHours?: number;
   averageRating?: number;
   totalReviews?: number;
   createdAt?: Date;
@@ -196,4 +198,29 @@ export interface NotificationItem {
   question?: TournamentQuestion | string;
   isRead: boolean;
   createdAt?: Date;
+}
+
+export interface Booking {
+  _id?: string;
+  user: User | string;
+  court: Court | string;
+  date: string;       // "YYYY-MM-DD"
+  startTime: string;  // "HH:MM"
+  endTime: string;    // "HH:MM"
+  status: 'active' | 'cancelled';
+  createdAt?: Date;
+}
+
+export interface BookingResult {
+  created: Array<{ _id: string; date: string; startTime: string; endTime: string }>;
+  skipped: Array<{ date: string; reason: string }>;
+}
+
+export interface BlockedSlot {
+  _id?: string;
+  court: string;
+  date: string;           // "YYYY-MM-DD"
+  startTime: string | null; // "HH:MM" or null (all-day)
+  endTime: string | null;
+  reason?: string;
 }

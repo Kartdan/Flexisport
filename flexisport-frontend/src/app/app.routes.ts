@@ -13,6 +13,9 @@ import { TournamentManagementComponent } from './components/tournament-managemen
 import { TournamentsComponent } from './components/tournaments/tournaments.component';
 import { TournamentDetailComponent } from './components/tournament-detail/tournament-detail.component';
 import { ProfileComponent } from './components/profile/profile.component';
+import { MyBookingsComponent } from './components/my-bookings/my-bookings.component';
+import { CourtBookersComponent } from './components/court-bookers/court-bookers.component';
+import { AdminUserManagementComponent } from './components/admin-user-management/admin-user-management.component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -27,7 +30,10 @@ export const routes: Routes = [
   { path: 'tournaments/:id', component: TournamentDetailComponent },
   { path: 'admin/supervisors', component: SupervisorManagementComponent },
   { path: 'admin/courts', component: CourtApprovalComponent },
+  { path: 'admin/users', component: AdminUserManagementComponent },
   { path: 'my-courts', component: CourtManagementComponent },
   { path: 'my-tournaments', component: TournamentManagementComponent },
+  { path: 'bookings', component: MyBookingsComponent },
+  { path: 'court-bookers', component: CourtBookersComponent },
   { path: 'profile', component: ProfileComponent },
 ];

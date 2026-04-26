@@ -1,0 +1,98 @@
+<div class="user-management">
+  <h2>👥 User Management</h2>
+
+  <!-- Filters -->
+  <div class="filters">
+    <input
+      type="text"
+      class="search-input"
+      placeholder="Search by name, username, or email…"
+      [(ngModel)]="searchQuery"
+      (keyup.enter)="loadUsers()"
+    />
+    <select class="role-filter" [(ngModel)]="filterRole" (change)="loadUsers()">
+      <option value="">All Roles</option>
+      <option value="player">Player</option>
+      <option value="owner">Owner</option>
+      <option value="supervisor">Supervisor</option>
+      <option value="admin">Admin</option>
+    </select>
+    <button class="btn btn-search" (click)="loadUsers()">Search</button>
+  </div>
+
+  <div *ngIf="successMessage" class="alert alert-success">{{ successMessage }}</div>
+  <div *ngIf="errorMessage" class="alert alert-error">{{ errorMessage }}</div>
+
+  <div *ngIf="loading" class="loading-msg">Loading users…</div>
+
+  <div *ngIf="!loading && users.length === 0 && !errorMessage" class="empty-state">
+    No users found.
+  </div>
+
+  <table *ngIf="!loading && users.length > 0" class="users-table">
+    <thead>
+      <tr>
+        <th>Full Name</th>
+        <th>Username</th>
+        <th>Email</th>
+        <th>Role</th>
+        <th>Status</th>
+        <th>Joined</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let user of users" [class.row-suspended]="user.suspended">
+        <td>{{ user.fullName }}</td>
+        <td class="username-cell">@{{ user.username }}</td>
+        <td>{{ user.email }}</td>
+
+        <!-- Role cell: inline edit -->
+        <td class="role-cell">
+          <ng-container *ngIf="editingRoleUserId !== (user._id || user.id); else roleEditTpl">
+            <span [class]="getRoleBadgeClass(user.role)">{{ user.role }}</span>
+            <button
+              *ngIf="!isSelf(user)"
+              class="btn btn-xs btn-edit-role"
+              (click)="startEditRole(user)"
+              title="Change role"
+            >✏️</button>
+          </ng-container>
+          <ng-template #roleEditTpl>
+            <select [(ngModel)]="pendingRole" class="role-select">
+              <option value="player">player</option>
+              <option value="owner">owner</option>
+              <option value="supervisor">supervisor</option>
+              <option value="admin">admin</option>
+            </select>
+            <button class="btn btn-xs btn-save-role" (click)="saveRole(user)">✔</button>
+            <button class="btn btn-xs btn-cancel-role" (click)="cancelEditRole()">✕</button>
+          </ng-template>
+        </td>
+
+        <!-- Account status -->
+        <td>
+          <span class="status-badge" [class.status-active]="!user.suspended" [class.status-suspended]="user.suspended">
+            {{ user.suspended ? 'Suspended' : 'Active' }}
+          </span>
+        </td>
+
+        <td class="date-cell">{{ user.createdAt | date:'dd MMM yyyy' }}</td>
+
+        <!-- Actions -->
+        <td class="actions-cell">
+          <button
+            *ngIf="!isSelf(user)"
+            class="btn btn-sm"
+            [class.btn-suspend]="!user.suspended"
+            [class.btn-unsuspend]="user.suspended"
+            (click)="toggleSuspend(user)"
+          >
+            {{ user.suspended ? '🔓 Unsuspend' : '🔒 Suspend' }}
+          </button>
+          <span *ngIf="isSelf(user)" class="self-label">You</span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

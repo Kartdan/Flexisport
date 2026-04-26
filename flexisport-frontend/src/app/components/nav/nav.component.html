@@ -9,12 +9,16 @@
     <li><a routerLink="/courts">Courts</a></li>
     <li><a routerLink="/tournaments">Tournaments</a></li>
     <li *ngIf="isLoggedIn"><a routerLink="/bookings">My Bookings</a></li>
-    <li *ngIf="isLoggedIn"><a routerLink="/profile">Profile</a></li>
+    <li *ngIf="isLoggedIn && !isAdmin"><a routerLink="/profile">Profile</a></li>
     <li *ngIf="isAdmin"><a routerLink="/admin/supervisors">Supervisors</a></li>
     <li *ngIf="isAdmin"><a routerLink="/admin/courts">Court Approvals</a></li>
+    <li *ngIf="isAdmin"><a routerLink="/admin/users">Users</a></li>
     <li *ngIf="isOwner"><a routerLink="/my-courts">My Courts</a></li>
     <li *ngIf="isOwner"><a routerLink="/my-tournaments">My Tournaments</a></li>
   </ul>
+  <div class="nav-auth" *ngIf="!isLoggedIn">
+    <a routerLink="/login" class="btn-login-nav">Login</a>
+  </div>
   <div class="nav-auth" *ngIf="isLoggedIn">
     <div class="notification-wrapper" #notificationWrapper>
       <button class="notification-btn" type="button" (click)="toggleNotifications()" aria-label="Notifications">

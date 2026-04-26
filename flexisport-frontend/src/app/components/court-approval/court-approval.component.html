@@ -21,38 +21,70 @@
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let court of courts">
-        <td>{{ court.name }}</td>
-        <td>{{ getAuthorName(court) }}</td>
-        <td>{{ court.address }}</td>
-        <td>{{ court.sportCategories.join(', ') }}</td>
-        <td>{{ court.pricePerHour }} RON/h</td>
-        <td>
-          <span [class]="'status-badge status-' + court.status">
-            {{ court.status }}
-          </span>
-        </td>
-        <td class="actions">
-          <button
-            class="btn btn-accept"
-            [disabled]="court.status === CourtStatus.ACCEPTED"
-            (click)="updateStatus(court, CourtStatus.ACCEPTED)">
-            Accept
-          </button>
-          <button
-            class="btn btn-reject"
-            [disabled]="court.status === CourtStatus.REJECTED"
-            (click)="updateStatus(court, CourtStatus.REJECTED)">
-            Reject
-          </button>
-          <button
-            class="btn btn-pending"
-            [disabled]="court.status === CourtStatus.PENDING"
-            (click)="updateStatus(court, CourtStatus.PENDING)">
-            Set Pending
-          </button>
-        </td>
-      </tr>
+      <ng-container *ngFor="let court of courts">
+        <tr>
+          <td>{{ court.name }}</td>
+          <td>{{ getAuthorName(court) }}</td>
+          <td>{{ court.address }}</td>
+          <td>{{ court.sportCategories.join(', ') }}</td>
+          <td>{{ court.pricePerHour }} RON/h</td>
+          <td>
+            <span [class]="'status-badge status-' + court.status">
+              {{ court.status }}
+            </span>
+          </td>
+          <td class="actions">
+            <button
+              class="btn btn-accept"
+              [disabled]="court.status === CourtStatus.ACCEPTED"
+              (click)="updateStatus(court, CourtStatus.ACCEPTED)">
+              Accept
+            </button>
+            <button
+              class="btn btn-reject"
+              [disabled]="court.status === CourtStatus.REJECTED"
+              (click)="updateStatus(court, CourtStatus.REJECTED)">
+              Reject
+            </button>
+            <button
+              class="btn btn-pending"
+              [disabled]="court.status === CourtStatus.PENDING"
+              (click)="updateStatus(court, CourtStatus.PENDING)">
+              Set Pending
+            </button>
+            <button class="btn btn-bookings" (click)="toggleCourtBookings(court)">
+              {{ expandedBookingsCourtId === court._id ? 'Hide Bookings' : 'View Bookings' }}
+            </button>
+          </td>
+        </tr>
+        <tr *ngIf="expandedBookingsCourtId === court._id" class="bookings-row">
+          <td colspan="7">
+            <div class="court-bookings-panel">
+              <div *ngIf="bookingsLoading" class="bookings-loading">Loading bookings...</div>
+              <div *ngIf="bookingsError" class="bookings-error">{{ bookingsError }}</div>
+              <div *ngIf="!bookingsLoading && courtBookings.length === 0 && !bookingsError" class="bookings-empty">No active bookings.</div>
+              <table *ngIf="!bookingsLoading && courtBookings.length > 0" class="bookings-table">
+                <thead>
+                  <tr>
+                    <th>User</th>
+                    <th>Date</th>
+                    <th>Start</th>
+                    <th>End</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let booking of courtBookings">
+                    <td>{{ getBookingUser(booking) }}</td>
+                    <td>{{ booking.date }}</td>
+                    <td>{{ booking.startTime }}</td>
+                    <td>{{ booking.endTime }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </td>
+        </tr>
+      </ng-container>
     </tbody>
   </table>
 </div>

@@ -1,9 +1,28 @@
 const express = require("express");
+const path = require("path");
+const fs = require("fs");
+const multer = require("multer");
 const Court = require("../models/Court");
 const Review = require("../models/Review");
 const Notification = require("../models/Notification");
+const BlockedSlot = require("../models/BlockedSlot");
 const { verifyToken, requireAdmin } = require("../middleware/auth");
-const upload = require("../middleware/upload");
+
+const courtStorage = multer.diskStorage({
+  destination: path.join(__dirname, "../uploads/courts"),
+  filename: (req, file, cb) => {
+    const unique = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+    cb(null, unique + path.extname(file.originalname));
+  }
+});
+const upload = multer({
+  storage: courtStorage,
+  fileFilter: (req, file, cb) => {
+    const allowed = ["image/jpeg", "image/png", "image/webp"];
+    allowed.includes(file.mimetype) ? cb(null, true) : cb(new Error("Only JPEG, PNG and WebP allowed"), false);
+  },
+  limits: { fileSize: 5 * 1024 * 1024 }
+});
 
 const router = express.Router();
 
@@ -153,11 +172,8 @@ router.post("/:id/photos", verifyToken, upload.array("photos", 10), async (req, 
       return res.status(403).json({ error: "Not authorized" });
     }
 
-    const base64Photos = req.files.map(f => {
-      const base64 = f.buffer.toString("base64");
-      return `data:${f.mimetype};base64,${base64}`;
-    });
-    court.photos.push(...base64Photos);
+    const photoUrls = req.files.map(f => `/uploads/courts/${f.filename}`);
+    court.photos.push(...photoUrls);
     await court.save();
     res.json(court);
   } catch (err) {
@@ -178,6 +194,12 @@ router.delete("/:id/photos", verifyToken, async (req, res) => {
 
     court.photos = court.photos.filter(p => p !== photo);
     await court.save();
+
+    // Remove the file from disk if it's a local upload path
+    if (photo.startsWith("/uploads/")) {
+      const filePath = path.join(__dirname, "..", photo);
+      fs.unlink(filePath, () => {}); // ignore error if file already gone
+    }
 
     res.json(court);
   } catch (err) {
@@ -212,6 +234,67 @@ router.delete("/:id", verifyToken, async (req, res) => {
     res.json({ message: "Court deleted" });
   } catch (err) {
     res.status(500).json({ error: "Failed to delete court" });
+  }
+});
+
+// --- Blocked Slots ---
+
+// GET /api/courts/:id/blocked-slots  (authenticated — any logged-in user can view to display in calendar)
+router.get("/:id/blocked-slots", verifyToken, async (req, res) => {
+  try {
+    const slots = await BlockedSlot.find({ court: req.params.id }).sort({ date: 1, startTime: 1 });
+    res.json(slots);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch blocked slots" });
+  }
+});
+
+// POST /api/courts/:id/blocked-slots  (owner only)
+router.post("/:id/blocked-slots", verifyToken, async (req, res) => {
+  try {
+    const court = await Court.findById(req.params.id);
+    if (!court) return res.status(404).json({ error: "Court not found" });
+    if (court.author.toString() !== req.user.id) {
+      return res.status(403).json({ error: "Not authorized" });
+    }
+
+    const { date, startTime, endTime, reason } = req.body;
+    if (!date) return res.status(400).json({ error: "date is required" });
+
+    // If one time is provided, both must be provided
+    if ((startTime && !endTime) || (!startTime && endTime)) {
+      return res.status(400).json({ error: "Provide both startTime and endTime, or neither for an all-day block" });
+    }
+    if (startTime && endTime && startTime >= endTime) {
+      return res.status(400).json({ error: "startTime must be before endTime" });
+    }
+
+    const slot = await BlockedSlot.create({
+      court: req.params.id,
+      date,
+      startTime: startTime || null,
+      endTime: endTime || null,
+      reason: reason || ""
+    });
+    res.status(201).json(slot);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to create blocked slot" });
+  }
+});
+
+// DELETE /api/courts/:id/blocked-slots/:slotId  (owner only)
+router.delete("/:id/blocked-slots/:slotId", verifyToken, async (req, res) => {
+  try {
+    const court = await Court.findById(req.params.id);
+    if (!court) return res.status(404).json({ error: "Court not found" });
+    if (court.author.toString() !== req.user.id) {
+      return res.status(403).json({ error: "Not authorized" });
+    }
+
+    await BlockedSlot.findOneAndDelete({ _id: req.params.slotId, court: req.params.id });
+    res.json({ message: "Blocked slot removed" });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to delete blocked slot" });
   }
 });
 

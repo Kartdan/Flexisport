@@ -30,6 +30,10 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
+  suspended: {
+    type: Boolean,
+    default: false
+  },
   createdAt: { type: Date, default: Date.now }
 }, { collection: "users" });
 

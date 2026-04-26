@@ -112,4 +112,43 @@
     background-color: #ffc107;
     color: #333;
   }
+
+  &.btn-bookings {
+    background-color: #00d1b2;
+    color: white;
+  }
+}
+
+.bookings-row td { padding: 0; }
+
+.court-bookings-panel {
+  background: #f9fafb;
+  border-top: 2px solid #00d1b2;
+  padding: 1rem 1.5rem;
+
+  .bookings-loading, .bookings-empty { color: #888; font-size: 0.9rem; }
+  .bookings-error { color: #c62828; font-size: 0.9rem; }
+
+  .bookings-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+
+    th {
+      background: #e8f5e9;
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+      font-weight: 600;
+      color: #1a1a1a;
+    }
+
+    td {
+      padding: 0.45rem 0.75rem;
+      border-bottom: 1px solid #eee;
+      color: #444;
+    }
+
+    tr:last-child td { border-bottom: none; }
+  }
 }

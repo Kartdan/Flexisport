@@ -101,4 +101,24 @@ export class AuthService {
       })
     );
   }
+
+  getAllUsers(filters?: { role?: string; search?: string }): Observable<User[]> {
+    let params = '';
+    if (filters?.role) params += `role=${encodeURIComponent(filters.role)}&`;
+    if (filters?.search) params += `search=${encodeURIComponent(filters.search)}&`;
+    const url = `${this.usersUrl}/admin/all${params ? '?' + params : ''}`;
+    return this.http.get<User[]>(url, { headers: this.getAuthHeaders() });
+  }
+
+  changeUserRole(userId: string, role: string): Observable<User> {
+    return this.http.patch<User>(`${this.usersUrl}/admin/${userId}/role`, { role }, {
+      headers: this.getAuthHeaders()
+    });
+  }
+
+  setUserSuspended(userId: string, suspended: boolean): Observable<User> {
+    return this.http.patch<User>(`${this.usersUrl}/admin/${userId}/suspend`, { suspended }, {
+      headers: this.getAuthHeaders()
+    });
+  }
 }

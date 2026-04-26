@@ -157,4 +157,63 @@ router.patch("/supervisors/:id/status", verifyToken, requireAdmin, async (req, r
   }
 });
 
+// --- Admin User Management ---
+
+// GET /api/users/admin/all  — all users with optional ?role= and ?search=
+router.get("/admin/all", verifyToken, requireAdmin, async (req, res) => {
+  try {
+    const filter = {};
+    if (req.query.role) filter.role = req.query.role;
+    if (req.query.search) {
+      const re = new RegExp(req.query.search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
+      filter.$or = [{ fullName: re }, { username: re }, { email: re }];
+    }
+    const users = await User.find(filter).select("-password").sort({ createdAt: -1 });
+    res.json(users);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch users" });
+  }
+});
+
+// PATCH /api/users/admin/:id/role  — change a user's role
+router.patch("/admin/:id/role", verifyToken, requireAdmin, async (req, res) => {
+  try {
+    const { role } = req.body;
+    if (!["player", "owner", "supervisor", "admin"].includes(role)) {
+      return res.status(400).json({ error: "Invalid role" });
+    }
+    if (req.params.id === req.user.id) {
+      return res.status(400).json({ error: "You cannot change your own role" });
+    }
+    const updates = { role };
+    if (role === "supervisor") updates.supervisorStatus = "pending";
+    else updates.supervisorStatus = null;
+
+    const user = await User.findByIdAndUpdate(req.params.id, updates, { new: true, select: "-password" });
+    if (!user) return res.status(404).json({ error: "User not found" });
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to update role" });
+  }
+});
+
+// PATCH /api/users/admin/:id/suspend  — suspend or unsuspend a user
+router.patch("/admin/:id/suspend", verifyToken, requireAdmin, async (req, res) => {
+  try {
+    if (req.params.id === req.user.id) {
+      return res.status(400).json({ error: "You cannot suspend yourself" });
+    }
+    const { suspended } = req.body;
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      { suspended: !!suspended },
+      { new: true, select: "-password" }
+    );
+    if (!user) return res.status(404).json({ error: "User not found" });
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to update suspension" });
+  }
+});
+
 module.exports = router;

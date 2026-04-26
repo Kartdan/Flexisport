@@ -51,6 +51,10 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ error: "Invalid credentials" });
     }
 
+    if (user.suspended) {
+      return res.status(403).json({ error: "Your account has been suspended. Please contact support." });
+    }
+
     if (user.role === 'supervisor') {
       if (user.supervisorStatus === 'pending') {
         return res.status(403).json({ error: "Your account is pending approval by an administrator." });
