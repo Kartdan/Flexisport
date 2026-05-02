@@ -23,7 +23,7 @@ router.get("/stats", verifyToken, requireSupervisorOrAdmin, async (req, res) => 
       Court.countDocuments({ status: "pending" }),
       Court.countDocuments({ status: "accepted" }),
       Tournament.countDocuments({ publicationStatus: "published" }),
-      Tournament.countDocuments({ status: "upcoming" }),
+      Tournament.countDocuments({ publicationStatus: { $in: ["unpublished", "suspended"] } }),
       ContactMessage.countDocuments({ recipientId: req.user.id, read: false }),
       ContactMessage.countDocuments({ recipientId: req.user.id }),
       Post.countDocuments(),

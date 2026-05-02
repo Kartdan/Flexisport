@@ -4,6 +4,11 @@ const cors = require("cors");
 const path = require("path");
 require("dotenv").config();
 
+if (!process.env.JWT_SECRET) {
+  console.error("❌ FATAL: JWT_SECRET environment variable is not set. Refusing to start.");
+  process.exit(1);
+}
+
 const app = express();
 
 app.set("etag", false);

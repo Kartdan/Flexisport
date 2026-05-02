@@ -49,14 +49,23 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-router.put("/:id", async (req, res) => {
+router.put("/:id", verifyToken, async (req, res) => {
   try {
-    const updatedPost = await Post.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true }
-    );
-    if (!updatedPost) return res.status(404).json({ error: "Post not found" });
+    const post = await Post.findById(req.params.id);
+    if (!post) return res.status(404).json({ error: "Post not found" });
+
+    const isAdminOrSupervisor = req.user.role === "admin" || req.user.role === "supervisor";
+    const isAuthor = post.authorRef?.toString() === req.user.id;
+    if (!isAdminOrSupervisor && !isAuthor) {
+      return res.status(403).json({ error: "Not authorized to edit this post" });
+    }
+
+    const allowed = {};
+    if (req.body.title !== undefined) allowed.title = req.body.title;
+    if (req.body.content !== undefined) allowed.content = req.body.content;
+    if (req.body.postType !== undefined) allowed.postType = req.body.postType;
+
+    const updatedPost = await Post.findByIdAndUpdate(req.params.id, allowed, { new: true });
     res.json(updatedPost);
   } catch (err) {
     console.error("❌ Error updating post:", err);

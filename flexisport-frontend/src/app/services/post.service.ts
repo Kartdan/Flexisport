@@ -28,6 +28,12 @@ export class PostService {
     });
   }
 
+  updatePost(id: string, data: Partial<Post>): Observable<Post> {
+    return this.http.put<Post>(`${this.apiUrl}/${id}`, data, {
+      headers: this.getAuthHeaders()
+    });
+  }
+
   deletePost(id: string): Observable<any> {
     return this.http.delete(`${this.apiUrl}/${id}`, {
       headers: this.getAuthHeaders()

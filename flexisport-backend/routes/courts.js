@@ -31,7 +31,7 @@ router.get("/", async (req, res) => {
     res.set("Cache-Control", "no-store, no-cache, must-revalidate");
     res.set("Pragma", "no-cache");
     res.set("Expires", "0");
-    const filter = { status: { $in: ["accepted", "pending"] } };
+    const filter = { status: "accepted" };
     if (req.query.sport) filter.sportCategories = req.query.sport;
     if (req.query.surface) filter.surfaceType = req.query.surface;
     if (req.query.minPrice || req.query.maxPrice) {
