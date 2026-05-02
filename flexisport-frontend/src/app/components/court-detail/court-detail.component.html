@@ -93,8 +93,11 @@
     </div>
 
     <div class="book-section">
-      <button class="book-btn" (click)="openBookingModal()" *ngIf="authService.isLoggedIn()">Book This Court</button>
-      <p class="login-to-book" *ngIf="!authService.isLoggedIn()">
+      <div *ngIf="court.suspended" class="suspended-notice">
+        🚫 This court has been suspended by an administrator and is currently unavailable for booking.
+      </div>
+      <button class="book-btn" (click)="openBookingModal()" *ngIf="authService.isLoggedIn() && !court.suspended">Book This Court</button>
+      <p class="login-to-book" *ngIf="!authService.isLoggedIn() && !court.suspended">
         <a routerLink="/login">Log in</a> to book this court.
       </p>
     </div>

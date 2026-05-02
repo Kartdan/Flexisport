@@ -112,8 +112,8 @@
     >
       <div class="court-header">
         <h3>{{ court.name }}</h3>
-        <span *ngIf="court.status === 'pending'" class="status-badge badge-approval-pending">⏳ Suspended</span>
-        <span *ngIf="court.status !== 'pending'" [ngClass]="getStatusBadgeClass(court.operationalStatus)" class="status-badge">
+        <span *ngIf="court.suspended" class="status-badge badge-suspended">🚫 Suspended</span>
+        <span *ngIf="!court.suspended" [ngClass]="getStatusBadgeClass(court.operationalStatus)" class="status-badge">
           {{ getStatusLabel(court.operationalStatus) }}
         </span>
       </div>

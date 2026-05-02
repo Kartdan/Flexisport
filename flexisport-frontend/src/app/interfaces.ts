@@ -83,6 +83,7 @@ export interface Court {
   schedules: Schedule[];
   status?: string;
   operationalStatus?: string;
+  suspended?: boolean;
   cancellationNoticeHours?: number;
   averageRating?: number;
   totalReviews?: number;

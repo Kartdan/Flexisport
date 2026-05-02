@@ -107,8 +107,10 @@
 
           <div class="answers" *ngIf="q._id && (answersByQuestion[q._id]?.length || 0) > 0">
             <div class="answer" *ngFor="let answer of answersByQuestion[q._id]">
-              <strong>{{ getAnsweredByName(answer.answeredBy) }}</strong>
-              <p>{{ answer.answer }}</p>
+              <div class="answer-body">
+                <strong>{{ getAnsweredByName(answer.answeredBy) }}</strong>
+                <p>{{ answer.answer }}</p>
+              </div>
               <button *ngIf="isSupervisorOrAdmin" class="btn-delete-qa btn-delete-answer" (click)="deleteAnswer(q, answer)" title="Delete answer">🗑</button>
             </div>
           </div>

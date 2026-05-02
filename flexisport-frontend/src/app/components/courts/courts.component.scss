@@ -250,6 +250,11 @@
             color: #424242;
           }
 
+          &.badge-suspended {
+            background-color: #fce4ec;
+            color: #b71c1c;
+          }
+
           &.badge-approval-pending {
             background-color: #fff3cd;
             color: #856404;

@@ -103,6 +103,31 @@ router.get("/admin/list", verifyToken, requireSupervisorOrAdmin, async (req, res
   }
 });
 
+router.patch("/admin/:id/suspend", verifyToken, requireSupervisorOrAdmin, async (req, res) => {
+  try {
+    const court = await Court.findOne({ _id: req.params.id, status: "accepted" }).populate("author", "username email fullName");
+    if (!court) return res.status(404).json({ error: "Court not found or not accepted" });
+
+    court.suspended = !court.suspended;
+    await court.save();
+
+    await Notification.create({
+      user: court.author._id,
+      type: "court_status",
+      title: court.suspended ? "Court suspended" : "Court reinstated",
+      message: court.suspended
+        ? `Your court "${court.name}" has been suspended by an administrator and is temporarily unavailable.`
+        : `Your court "${court.name}" has been reinstated and is now visible again.`,
+      court: court._id,
+      isRead: false
+    });
+
+    res.json(court);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to toggle court suspension" });
+  }
+});
+
 router.patch("/admin/:id/status", verifyToken, requireSupervisorOrAdmin, async (req, res) => {
   try {
     const { status } = req.body;

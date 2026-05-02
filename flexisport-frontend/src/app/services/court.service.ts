@@ -76,6 +76,12 @@ export class CourtService {
     });
   }
 
+  toggleCourtSuspension(courtId: string): Observable<Court> {
+    return this.http.patch<Court>(`${this.apiUrl}/admin/${courtId}/suspend`, {}, {
+      headers: this.getAuthHeaders()
+    });
+  }
+
   deletePhoto(courtId: string, photo: string): Observable<Court> {
     return this.http.delete<Court>(`${this.apiUrl}/${courtId}/photos`, {
       headers: this.getAuthHeaders(),
