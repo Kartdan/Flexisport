@@ -79,6 +79,38 @@ export class TournamentDetailComponent implements OnInit {
     return this.authService.getUserRole() === 'owner';
   }
 
+  get isSupervisorOrAdmin(): boolean {
+    const role = this.authService.getUserRole();
+    return role === 'admin' || role === 'supervisor';
+  }
+
+  deleteQuestion(q: TournamentQuestion): void {
+    if (!this.tournament?._id || !q._id) return;
+    if (!confirm('Delete this question and all its answers?')) return;
+    this.tournamentService.deleteQuestion(this.tournament._id, q._id).subscribe({
+      next: () => {
+        this.questions = this.questions.filter(item => item._id !== q._id);
+        if (q._id) delete this.answersByQuestion[q._id];
+        this.cdr.detectChanges();
+      },
+      error: () => { this.questionErrorMessage = 'Failed to delete question.'; this.cdr.detectChanges(); }
+    });
+  }
+
+  deleteAnswer(q: TournamentQuestion, answer: TournamentQuestionAnswer): void {
+    if (!this.tournament?._id || !q._id || !answer._id) return;
+    if (!confirm('Delete this answer?')) return;
+    this.tournamentService.deleteAnswer(this.tournament._id, q._id, answer._id).subscribe({
+      next: () => {
+        if (q._id) {
+          this.answersByQuestion[q._id] = (this.answersByQuestion[q._id] || []).filter(a => a._id !== answer._id);
+        }
+        this.cdr.detectChanges();
+      },
+      error: () => { this.questionErrorMessage = 'Failed to delete answer.'; this.cdr.detectChanges(); }
+    });
+  }
+
   get participantCount(): number {
     return this.tournament?.registeredParticipants?.length || 0;
   }

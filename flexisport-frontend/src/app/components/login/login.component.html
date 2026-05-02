@@ -16,21 +16,13 @@
     <button type="submit" [disabled]="loginForm.invalid">Sign In</button>
   </form>
 
-  <div *ngIf="supervisorPending" class="status-banner status-pending">
-    <span class="status-icon">⏳</span>
-    <div>
-      <strong>Account pending approval</strong>
-      <p>Your supervisor account is awaiting administrator approval. You will be able to log in once it has been accepted.</p>
-    </div>
-  </div>
-
-  <div *ngIf="supervisorRejected" class="status-banner status-rejected">
-    <span class="status-icon">❌</span>
-    <div>
-      <strong>Account rejected</strong>
-      <p>Your supervisor account has been rejected by an administrator. Please contact support for more information.</p>
-    </div>
-  </div>
-
   <p class="footer-text">Don't have an account? <a routerLink="/signup">Register here</a></p>
 </div>
+
+<app-error-popup
+  [visible]="popup.visible"
+  [type]="popup.type"
+  [title]="popup.title"
+  [message]="popup.message"
+  (closed)="closePopup()"
+></app-error-popup>

@@ -8,8 +8,8 @@ import { User, AuthResponse } from '../interfaces';
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'http://localhost:5000/api/auth';
-  private usersUrl = 'http://localhost:5000/api/users';
+  private apiUrl = '/api/auth';
+  private usersUrl = '/api/users';
 
   constructor(private http: HttpClient, private router: Router) {}
 
@@ -120,5 +120,31 @@ export class AuthService {
     return this.http.patch<User>(`${this.usersUrl}/admin/${userId}/suspend`, { suspended }, {
       headers: this.getAuthHeaders()
     });
+  }
+
+  getAnalytics(): Observable<any> {
+    return this.http.get<any>('/api/admin/analytics', {
+      headers: this.getAuthHeaders()
+    });
+  }
+
+  getSupervisorStats(): Observable<any> {
+    return this.http.get<any>('/api/supervisor/stats', {
+      headers: this.getAuthHeaders()
+    });
+  }
+
+  uploadAvatar(file: File): Observable<{ avatar: string }> {
+    const form = new FormData();
+    form.append('avatar', file);
+    return this.http.post<{ avatar: string }>(`${this.usersUrl}/me/avatar`, form, {
+      headers: new HttpHeaders({ Authorization: `Bearer ${this.getToken()}` })
+    });
+  }
+
+  getAvatarUrl(avatar?: string): string {
+    if (!avatar) return '';
+    if (avatar.startsWith('http') || avatar.startsWith('data:')) return avatar;
+    return `/uploads${avatar}`;
   }
 }

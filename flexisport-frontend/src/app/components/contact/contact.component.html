@@ -1,0 +1,115 @@
+<div class="contact-page">
+
+  <div class="contact-hero">
+    <h2>Contact Us</h2>
+    <p>Select a supervisor below and send them a message directly.</p>
+  </div>
+
+  <!-- Supervisors section -->
+  <section class="supervisors-section">
+    <h3>Choose a Supervisor</h3>
+    <p class="section-sub">Click on a supervisor to select them as the recipient of your message.</p>
+
+    <div *ngIf="supervisorsLoading" class="loading">Loading supervisors…</div>
+
+    <div *ngIf="!supervisorsLoading && supervisors.length === 0" class="empty-sup">
+      No supervisors are available at the moment.
+    </div>
+
+    <div class="supervisors-grid" *ngIf="!supervisorsLoading && supervisors.length > 0">
+      <div
+        class="supervisor-card"
+        [class.selected]="selectedSupervisor?._id === sup._id"
+        *ngFor="let sup of supervisors"
+        (click)="selectSupervisor(sup)"
+        role="button"
+        [attr.aria-pressed]="selectedSupervisor?._id === sup._id"
+        tabindex="0"
+        (keydown.enter)="selectSupervisor(sup)"
+        (keydown.space)="selectSupervisor(sup)"
+      >
+        <div class="selected-check" *ngIf="selectedSupervisor?._id === sup._id">✓</div>
+        <div class="sup-avatar">
+          <img *ngIf="getAvatarUrl(sup.avatar)" [src]="getAvatarUrl(sup.avatar)" [alt]="sup.fullName" />
+          <div *ngIf="!getAvatarUrl(sup.avatar)" class="sup-avatar-placeholder">
+            {{ sup.fullName[0]?.toUpperCase() }}
+          </div>
+        </div>
+        <div class="sup-info">
+          <div class="sup-name">{{ sup.fullName }}</div>
+          <div class="sup-sports" *ngIf="sup.preferredSports?.length">
+            {{ getSportEmojis(sup.preferredSports) }}
+          </div>
+          <p class="sup-bio" *ngIf="sup.personalDescription">{{ sup.personalDescription }}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact form -->
+  <section class="form-section" id="contact-form-section">
+    <h3>Send a Message</h3>
+
+    <div *ngIf="!selectedSupervisor && !sent" class="no-supervisor-hint">
+      👆 Select a supervisor above to enable the message form.
+    </div>
+
+    <div *ngIf="sent" class="alert alert-success">
+      ✅ Your message has been sent to <strong>{{ selectedSupervisor?.fullName }}</strong>! They will get back to you soon.
+    </div>
+
+    <form *ngIf="selectedSupervisor && !sent" class="contact-form" [formGroup]="form" (ngSubmit)="send()">
+      <div class="recipient-banner">
+        <div class="recipient-avatar">
+          <img *ngIf="getAvatarUrl(selectedSupervisor.avatar)" [src]="getAvatarUrl(selectedSupervisor.avatar)" [alt]="selectedSupervisor.fullName" />
+          <div *ngIf="!getAvatarUrl(selectedSupervisor.avatar)" class="recipient-avatar-placeholder">
+            {{ selectedSupervisor.fullName[0]?.toUpperCase() }}
+          </div>
+        </div>
+        <div>
+          <span class="recipient-label">Sending to:</span>
+          <span class="recipient-name">{{ selectedSupervisor.fullName }}</span>
+        </div>
+        <button type="button" class="change-btn" (click)="selectedSupervisor = null">Change</button>
+      </div>
+
+      <div *ngIf="errorMessage" class="alert alert-error">{{ errorMessage }}</div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="c-name">Your Name *</label>
+          <input id="c-name" type="text" formControlName="name" placeholder="Full name" />
+          <small *ngIf="form.get('name')?.touched && form.get('name')?.invalid">Please enter your name.</small>
+        </div>
+        <div class="form-group">
+          <label for="c-email">Email *</label>
+          <input id="c-email" type="email" formControlName="email" placeholder="you@example.com" />
+          <small *ngIf="form.get('email')?.touched && form.get('email')?.invalid">Enter a valid email.</small>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="c-subject">Subject *</label>
+        <input id="c-subject" type="text" formControlName="subject" placeholder="How can we help?" />
+        <small *ngIf="form.get('subject')?.touched && form.get('subject')?.invalid">Please enter a subject.</small>
+      </div>
+
+      <div class="form-group">
+        <label for="c-message">Message *</label>
+        <textarea id="c-message" formControlName="message" rows="6"
+          placeholder="Describe your issue or question in detail…" maxlength="2000"></textarea>
+        <div class="char-count">{{ (form.get('message')?.value || '').length }} / 2000</div>
+        <small *ngIf="form.get('message')?.touched && form.get('message')?.invalid">
+          Message must be between 10 and 2000 characters.
+        </small>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn-send" [disabled]="sending || form.invalid">
+          {{ sending ? 'Sending…' : '✉ Send Message' }}
+        </button>
+      </div>
+    </form>
+  </section>
+
+</div>

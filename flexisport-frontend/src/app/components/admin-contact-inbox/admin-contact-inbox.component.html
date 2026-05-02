@@ -1,0 +1,71 @@
+<div class="inbox-page">
+  <div class="inbox-header">
+    <h2>Contact Inbox
+      <span class="unread-badge" *ngIf="unreadCount > 0">{{ unreadCount }} unread</span>
+    </h2>
+    <div class="inbox-actions">
+      <label class="toggle-unread">
+        <input type="checkbox" [(ngModel)]="filterUnread" /> Show unread only
+      </label>
+      <button class="refresh-btn" (click)="load()" [disabled]="loading">↻ Refresh</button>
+    </div>
+  </div>
+
+  <div *ngIf="errorMessage" class="alert-error">{{ errorMessage }}</div>
+  <div *ngIf="loading" class="loading">Loading messages…</div>
+
+  <div class="inbox-layout" *ngIf="!loading">
+    <!-- Message list -->
+    <div class="message-list">
+      <div *ngIf="displayed.length === 0" class="empty">No messages.</div>
+      <div
+        *ngFor="let msg of displayed"
+        class="message-row"
+        [class.unread]="!msg.read"
+        [class.active]="selected?._id === msg._id"
+        (click)="open(msg)"
+      >
+        <div class="msg-meta">
+          <span class="msg-from">{{ msg.name }}</span>
+          <span class="msg-date">{{ formatDate(msg.createdAt) }}</span>
+        </div>
+        <div class="msg-subject">{{ msg.subject }}</div>
+        <div class="msg-preview">{{ msg.message | slice:0:80 }}{{ msg.message.length > 80 ? '…' : '' }}</div>
+      </div>
+    </div>
+
+    <!-- Detail panel -->
+    <div class="message-detail" *ngIf="selected">
+      <div class="detail-header">
+        <div>
+          <h3>{{ selected.subject }}</h3>
+          <p class="detail-from">
+            From: <strong>{{ selected.name }}</strong>
+            (<a [href]="'mailto:' + selected.email">{{ selected.email }}</a>)
+            <span *ngIf="selected.userId"> · Registered user: {{ selected.userId.fullName }}</span>
+          </p>
+          <p class="detail-to" *ngIf="selected.recipientName">
+            To: <strong>{{ selected.recipientName }}</strong>
+            <span *ngIf="selected.recipientEmail"> (<a [href]="'mailto:' + selected.recipientEmail">{{ selected.recipientEmail }}</a>)</span>
+          </p>
+          <p class="detail-date">{{ formatDate(selected.createdAt) }}</p>
+        </div>
+        <div class="detail-btns">
+          <button class="btn-icon" (click)="toggleRead(selected)" [title]="selected.read ? 'Mark unread' : 'Mark read'">
+            {{ selected.read ? '📭' : '📬' }}
+          </button>
+          <button class="btn-icon btn-delete" (click)="delete(selected)" title="Delete">🗑</button>
+          <button class="btn-icon" (click)="close()" title="Close">✕</button>
+        </div>
+      </div>
+      <div class="detail-body">{{ selected.message }}</div>
+      <a class="reply-link" [href]="'mailto:' + selected.email + '?subject=Re: ' + selected.subject">
+        ✉ Reply to sender
+      </a>
+    </div>
+
+    <div class="message-detail placeholder" *ngIf="!selected">
+      <p>Select a message to read it.</p>
+    </div>
+  </div>
+</div>

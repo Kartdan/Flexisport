@@ -8,7 +8,7 @@ import { NotificationItem } from '../interfaces';
   providedIn: 'root'
 })
 export class NotificationService {
-  private apiUrl = 'http://localhost:5000/api/notifications';
+  private apiUrl = '/api/notifications';
 
   constructor(private http: HttpClient, private authService: AuthService) {}
 

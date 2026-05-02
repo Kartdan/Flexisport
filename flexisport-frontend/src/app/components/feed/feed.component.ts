@@ -70,4 +70,21 @@ export class FeedComponent implements OnInit {
   get canCreatePost(): boolean {
     return this.isAdmin || this.isSupervisor;
   }
+
+  canDeletePost(post: Post): boolean {
+    if (this.isAdmin || this.isSupervisor) return true;
+    const user = this.authService.getStoredUser();
+    return !!(user && (post as any).authorRef === (user._id || user.id));
+  }
+
+  deletePost(post: Post): void {
+    if (!confirm('Delete this post?')) return;
+    this.postService.deletePost((post as any)._id).subscribe({
+      next: () => {
+        this.posts = this.posts.filter(p => (p as any)._id !== (post as any)._id);
+        this.cdr.detectChanges();
+      },
+      error: () => { this.errorMessage = 'Failed to delete post.'; this.cdr.detectChanges(); }
+    });
+  }
 }

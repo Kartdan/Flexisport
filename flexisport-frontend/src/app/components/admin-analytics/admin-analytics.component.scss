@@ -1,0 +1,297 @@
+.analytics-page {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.analytics-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+
+  h2 {
+    margin: 0;
+    font-size: 1.8rem;
+    color: #1a1a1a;
+  }
+}
+
+.refresh-btn {
+  background: #00d1b2;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 0.5rem 1.25rem;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.2s;
+
+  &:hover:not(:disabled) {
+    background: #00a88d;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.alert-error {
+  background: #ffebee;
+  color: #c62828;
+  border-radius: 6px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+/* --- KPI Cards --- */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+}
+
+.kpi-card {
+  background: white;
+  border-radius: 10px;
+  padding: 1.25rem 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+
+  .kpi-icon {
+    font-size: 2rem;
+    flex-shrink: 0;
+  }
+
+  .kpi-body {
+    min-width: 0;
+  }
+
+  .kpi-value {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    line-height: 1.1;
+  }
+
+  .kpi-label {
+    font-size: 0.85rem;
+    color: #666;
+    margin-top: 0.2rem;
+  }
+
+  .kpi-sub {
+    font-size: 0.75rem;
+    color: #999;
+    margin-top: 0.15rem;
+  }
+}
+
+.kpi-users   { border-left: 4px solid #5c6bc0; }
+.kpi-courts  { border-left: 4px solid #26a69a; }
+.kpi-bookings{ border-left: 4px solid #ef5350; }
+.kpi-revenue { border-left: 4px solid #ffa726; }
+.kpi-tournaments { border-left: 4px solid #ab47bc; }
+
+/* --- Bar Charts --- */
+.charts-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.chart-card {
+  background: white;
+  border-radius: 10px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+
+  h3 {
+    margin: 0 0 1.25rem;
+    font-size: 1rem;
+    color: #1a1a1a;
+
+    .chart-subtitle {
+      font-size: 0.8rem;
+      color: #999;
+      font-weight: 400;
+    }
+  }
+}
+
+.bar-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.5rem;
+  height: 160px;
+
+  .bar-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+    justify-content: flex-end;
+
+    .bar-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      width: 100%;
+      flex: 1;
+    }
+
+    .bar-value {
+      font-size: 0.7rem;
+      color: #555;
+      margin-bottom: 3px;
+    }
+
+    .bar {
+      width: 70%;
+      min-height: 2px;
+      background: #00d1b2;
+      border-radius: 3px 3px 0 0;
+      transition: height 0.3s;
+
+      &.bar-revenue {
+        background: #ffa726;
+      }
+    }
+
+    .bar-label {
+      font-size: 0.65rem;
+      color: #888;
+      margin-top: 4px;
+      text-align: center;
+      white-space: nowrap;
+    }
+  }
+}
+
+/* --- Info Cards Row --- */
+.info-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.info-card {
+  background: white;
+  border-radius: 10px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+
+  h3 {
+    margin: 0 0 1rem;
+    font-size: 1rem;
+    color: #1a1a1a;
+  }
+}
+
+.role-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+
+  li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .role-count {
+    font-weight: 700;
+    color: #1a1a1a;
+    font-size: 1rem;
+  }
+}
+
+.role-badge {
+  padding: 0.2rem 0.65rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.badge-player     { background: #e3f2fd; color: #1565c0; }
+.badge-owner      { background: #e8f5e9; color: #2e7d32; }
+.badge-supervisor { background: #fff3e0; color: #e65100; }
+.badge-admin      { background: #fce4ec; color: #c62828; }
+.badge-accepted   { background: #e8f5e9; color: #2e7d32; }
+.badge-pending    { background: #fff3cd; color: #856404; }
+.badge-rejected   { background: #ffebee; color: #c62828; }
+.badge-total      { background: #f5f5f5; color: #424242; }
+
+/* --- Top Courts Table --- */
+.top-courts-card {
+  background: white;
+  border-radius: 10px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+
+  h3 {
+    margin: 0 0 1rem;
+    font-size: 1rem;
+    color: #1a1a1a;
+  }
+}
+
+.top-courts-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+
+  th {
+    text-align: left;
+    padding: 0.6rem 0.75rem;
+    background: #f8f9fa;
+    color: #555;
+    font-weight: 600;
+    border-bottom: 2px solid #eee;
+  }
+
+  td {
+    padding: 0.65rem 0.75rem;
+    border-bottom: 1px solid #f0f0f0;
+    color: #333;
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+
+  .rank {
+    font-weight: 700;
+    color: #00a88d;
+    width: 32px;
+  }
+
+  .address {
+    color: #777;
+    font-size: 0.85rem;
+  }
+
+  .bookings-count {
+    font-weight: 700;
+    text-align: right;
+  }
+}

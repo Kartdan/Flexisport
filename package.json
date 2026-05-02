@@ -1,0 +1,10 @@
+{
+  "scripts": {
+    "start": "concurrently --names \"BACKEND,FRONTEND\" --prefix-colors \"cyan,magenta\" \"npm run dev --prefix flexisport-backend\" \"npm run start --prefix flexisport-frontend\"",
+    "backend": "npm run dev --prefix flexisport-backend",
+    "frontend": "npm run start --prefix flexisport-frontend"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}

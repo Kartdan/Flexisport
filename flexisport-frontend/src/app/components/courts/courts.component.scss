@@ -22,34 +22,148 @@
 
   .filter-section {
     margin-bottom: 2rem;
-    display: flex;
-    gap: 1rem;
+    background: white;
+    border-radius: 10px;
+    border: 1px solid #e0e0e0;
+    padding: 1rem 1.25rem;
+
+    .filter-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      align-items: flex-end;
+    }
 
     .filter-group {
       display: flex;
-      align-items: center;
-      gap: 0.5rem;
+      flex-direction: column;
+      gap: 0.3rem;
+      min-width: 0;
 
       label {
-        font-weight: 500;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #555;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+      }
+    }
+
+    .filter-select,
+    .filter-input {
+      padding: 0.45rem 0.75rem;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      background: white;
+      color: #333;
+      height: 36px;
+      box-sizing: border-box;
+
+      &:focus {
+        outline: none;
+        border-color: #00d1b2;
+        box-shadow: 0 0 0 3px rgba(0, 209, 178, 0.15);
+      }
+    }
+
+    .advanced-toggle {
+      align-self: flex-end;
+      background: none;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 0.45rem 0.9rem;
+      font-size: 0.85rem;
+      cursor: pointer;
+      color: #555;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      white-space: nowrap;
+      transition: border-color 0.2s, color 0.2s;
+
+      &:hover {
+        border-color: #00d1b2;
+        color: #00a88d;
       }
 
-      .sport-select {
-        padding: 0.5rem 1rem;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        font-size: 1rem;
-        cursor: pointer;
-        background-color: white;
+      .filter-badge {
+        background: #00d1b2;
+        color: white;
+        border-radius: 10px;
+        font-size: 0.7rem;
+        padding: 0.1rem 0.45rem;
+        font-weight: 700;
+      }
+    }
 
-        &:hover {
-          border-color: #00d1b2;
+    .reset-btn {
+      align-self: flex-end;
+      background: none;
+      border: 1px solid #ef9a9a;
+      border-radius: 6px;
+      padding: 0.45rem 0.9rem;
+      font-size: 0.85rem;
+      cursor: pointer;
+      color: #c62828;
+      height: 36px;
+      white-space: nowrap;
+      transition: background 0.2s;
+
+      &:hover {
+        background: #ffebee;
+      }
+    }
+
+    .advanced-filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      align-items: flex-end;
+      margin-top: 0.85rem;
+      padding-top: 0.85rem;
+      border-top: 1px solid #f0f0f0;
+
+      .price-range {
+        .price-inputs {
+          display: flex;
+          align-items: center;
+          gap: 0.4rem;
         }
 
-        &:focus {
-          outline: none;
-          border-color: #00d1b2;
-          box-shadow: 0 0 5px rgba(0, 209, 178, 0.3);
+        .price-input {
+          width: 90px;
+        }
+
+        .price-sep {
+          color: #999;
+          font-size: 0.9rem;
+        }
+      }
+
+      .rating-stars {
+        display: flex;
+        gap: 0.15rem;
+
+        .star-btn {
+          background: none;
+          border: none;
+          font-size: 1.4rem;
+          cursor: pointer;
+          color: #ddd;
+          padding: 0;
+          line-height: 1;
+          transition: color 0.15s, transform 0.1s;
+
+          &.active {
+            color: #ffa726;
+          }
+
+          &:hover {
+            transform: scale(1.2);
+            color: #ffa726;
+          }
         }
       }
     }
@@ -135,6 +249,21 @@
             background-color: #f5f5f5;
             color: #424242;
           }
+
+          &.badge-approval-pending {
+            background-color: #fff3cd;
+            color: #856404;
+          }
+        }
+      }
+
+      &.court-card--pending {
+        opacity: 0.65;
+        cursor: not-allowed;
+
+        &:hover {
+          transform: none;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
       }
 
@@ -235,6 +364,15 @@
           &:active {
             background-color: #008f75;
           }
+        }
+
+        .pending-notice {
+          display: block;
+          text-align: center;
+          padding: 0.75rem;
+          color: #856404;
+          font-size: 0.9rem;
+          font-style: italic;
         }
       }
     }

@@ -16,7 +16,39 @@ export class CourtsComponent implements OnInit {
   courts: Court[] = [];
   sports: Sport[] = [];
   filteredCourts: Court[] = [];
+
+  // Filters
   selectedSport: string = '';
+  selectedSurface: string = '';
+  citySearch: string = '';
+  minPrice: number | null = null;
+  maxPrice: number | null = null;
+  minRating: number = 0;
+  sortBy: string = 'default';
+  filtersExpanded = false;
+
+  readonly surfaceOptions = [
+    { value: 'grass', label: 'Grass' },
+    { value: 'clay', label: 'Clay' },
+    { value: 'synthetic', label: 'Synthetic' },
+    { value: 'hardcourt', label: 'Hardcourt' },
+    { value: 'indoor', label: 'Indoor' },
+    { value: 'sand', label: 'Sand' },
+    { value: 'parquet', label: 'Parquet' },
+    { value: 'other', label: 'Other' },
+  ];
+
+  get activeFilterCount(): number {
+    let n = 0;
+    if (this.selectedSport) n++;
+    if (this.selectedSurface) n++;
+    if (this.citySearch) n++;
+    if (this.minPrice != null) n++;
+    if (this.maxPrice != null) n++;
+    if (this.minRating > 0) n++;
+    if (this.sortBy !== 'default') n++;
+    return n;
+  }
   loading = true;
   errorMessage = '';
 
@@ -104,7 +136,14 @@ export class CourtsComponent implements OnInit {
   }
 
   loadCourts(): void {
-    this.courtService.getAllCourts().subscribe({
+    this.loading = true;
+    this.courtService.getAllCourts({
+      sport: this.selectedSport || undefined,
+      surface: this.selectedSurface || undefined,
+      minPrice: this.minPrice ?? undefined,
+      maxPrice: this.maxPrice ?? undefined,
+      city: this.citySearch || undefined,
+    }).subscribe({
       next: (data) => {
         this.courts = data;
         this.applyFilter();
@@ -120,23 +159,63 @@ export class CourtsComponent implements OnInit {
   }
 
   applyFilter(): void {
-    if (!this.selectedSport) {
-      this.filteredCourts = [...this.courts];
-    } else {
-      this.filteredCourts = this.courts.filter(court =>
-        court.sportCategories?.includes(this.selectedSport)
-      );
+    let result = [...this.courts];
+
+    // Client-side: rating filter
+    if (this.minRating > 0) {
+      result = result.filter(c => (c.averageRating || 0) >= this.minRating);
     }
+
+    // Sort
+    switch (this.sortBy) {
+      case 'price-asc':
+        result.sort((a, b) => (a.pricePerHour || 0) - (b.pricePerHour || 0));
+        break;
+      case 'price-desc':
+        result.sort((a, b) => (b.pricePerHour || 0) - (a.pricePerHour || 0));
+        break;
+      case 'rating-desc':
+        result.sort((a, b) => (b.averageRating || 0) - (a.averageRating || 0));
+        break;
+      case 'name-asc':
+        result.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+        break;
+    }
+
+    this.filteredCourts = result;
   }
 
   onSportChange(): void {
+    this.loadCourts();
+  }
+
+  onFilterChange(): void {
+    this.loadCourts();
+  }
+
+  onClientFilterChange(): void {
     this.applyFilter();
   }
 
-  goToCourtDetail(courtId: string | undefined): void {
-    if (courtId) {
-      this.router.navigate(['/courts', courtId]);
-    }
+  resetFilters(): void {
+    this.selectedSport = '';
+    this.selectedSurface = '';
+    this.citySearch = '';
+    this.minPrice = null;
+    this.maxPrice = null;
+    this.minRating = 0;
+    this.sortBy = 'default';
+    this.loadCourts();
+  }
+
+  goToCourtDetail(court: Court): void {
+    if (!court._id) return;
+    if (court.status === 'pending') return;
+    this.router.navigate(['/courts', court._id]);
+  }
+
+  getApprovalBadgeClass(court: Court): string {
+    return court.status === 'pending' ? 'badge-approval-pending' : '';
   }
 
   getStatusBadgeClass(status: string | undefined): string {

@@ -7,7 +7,7 @@ import { Sport } from '../interfaces';
   providedIn: 'root'
 })
 export class SportService {
-  private apiUrl = 'http://localhost:5000/api/sports';
+  private apiUrl = '/api/sports';
 
   constructor(private http: HttpClient) {}
 

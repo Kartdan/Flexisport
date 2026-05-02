@@ -24,4 +24,11 @@ function requireAdmin(req, res, next) {
   next();
 }
 
-module.exports = { verifyToken, requireAdmin };
+function requireSupervisorOrAdmin(req, res, next) {
+  if (req.user?.role !== "admin" && req.user?.role !== "supervisor") {
+    return res.status(403).json({ error: "Access denied. Admins and supervisors only." });
+  }
+  next();
+}
+
+module.exports = { verifyToken, requireAdmin, requireSupervisorOrAdmin };

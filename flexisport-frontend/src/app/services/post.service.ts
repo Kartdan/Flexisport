@@ -8,7 +8,7 @@ import { AuthService } from './auth.service';
   providedIn: 'root'
 })
 export class PostService {
-  private apiUrl = 'http://localhost:5000/api/posts';
+  private apiUrl = '/api/posts';
 
   constructor(private http: HttpClient, private authService: AuthService) {}
 
@@ -24,6 +24,12 @@ export class PostService {
 
   createPost(post: Partial<Post>): Observable<Post> {
     return this.http.post<Post>(this.apiUrl, post, {
+      headers: this.getAuthHeaders()
+    });
+  }
+
+  deletePost(id: string): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/${id}`, {
       headers: this.getAuthHeaders()
     });
   }

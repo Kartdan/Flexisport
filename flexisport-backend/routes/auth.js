@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const User = require("../models/User");
+const Notification = require("../models/Notification");
 
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
@@ -30,6 +31,20 @@ router.post("/register", async (req, res) => {
 
     const user = new User(userData);
     await user.save();
+
+    // Notify all admins that a new supervisor is awaiting approval
+    if (role === 'supervisor') {
+      const admins = await User.find({ role: 'admin' }, { _id: 1 });
+      if (admins.length > 0) {
+        const notifications = admins.map(admin => ({
+          user: admin._id,
+          type: 'supervisor_registered',
+          title: 'New Supervisor Registration',
+          message: `${fullName} (${email}) has registered as a supervisor and is awaiting your approval.`
+        }));
+        await Notification.insertMany(notifications);
+      }
+    }
 
     res.status(201).json({ message: "Registration successful" });
   } catch (err) {

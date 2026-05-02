@@ -61,7 +61,10 @@ router.delete("/:id", verifyToken, async (req, res) => {
   try {
     const review = await Review.findById(req.params.id);
     if (!review) return res.status(404).json({ error: "Review not found" });
-    if (review.author.toString() !== req.user.id) {
+
+    const isAdminOrSupervisor = req.user.role === "admin" || req.user.role === "supervisor";
+    const isAuthor = review.author.toString() === req.user.id;
+    if (!isAdminOrSupervisor && !isAuthor) {
       return res.status(403).json({ error: "Not authorized" });
     }
 

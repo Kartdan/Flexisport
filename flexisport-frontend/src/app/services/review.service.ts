@@ -8,7 +8,7 @@ import { AuthService } from './auth.service';
   providedIn: 'root'
 })
 export class ReviewService {
-  private apiUrl = 'http://localhost:5000/api/reviews';
+  private apiUrl = '/api/reviews';
 
   constructor(private http: HttpClient, private authService: AuthService) {}
 

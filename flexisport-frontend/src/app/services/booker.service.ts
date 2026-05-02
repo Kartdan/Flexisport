@@ -15,7 +15,7 @@ export interface BookerEntry {
 
 @Injectable({ providedIn: 'root' })
 export class BookerService {
-  private apiUrl = 'http://localhost:5000/api/bookers';
+  private apiUrl = '/api/bookers';
 
   constructor(private http: HttpClient, private authService: AuthService) {}
 

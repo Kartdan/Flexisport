@@ -8,7 +8,7 @@ import { Tournament, TournamentQuestion, TournamentQuestionAnswer } from '../int
   providedIn: 'root'
 })
 export class TournamentService {
-  private apiUrl = 'http://localhost:5000/api/tournaments';
+  private apiUrl = '/api/tournaments';
 
   constructor(private http: HttpClient, private authService: AuthService) {}
 
@@ -67,6 +67,18 @@ export class TournamentService {
       { publicationStatus },
       { headers: this.getAuthHeaders() }
     );
+  }
+
+  deleteQuestion(tournamentId: string, questionId: string): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/${tournamentId}/questions/${questionId}`, {
+      headers: this.getAuthHeaders()
+    });
+  }
+
+  deleteAnswer(tournamentId: string, questionId: string, answerId: string): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/${tournamentId}/questions/${questionId}/answers/${answerId}`, {
+      headers: this.getAuthHeaders()
+    });
   }
 
   createTournament(tournament: Partial<Tournament>): Observable<Tournament> {

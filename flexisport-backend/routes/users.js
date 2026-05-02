@@ -1,8 +1,27 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const path = require("path");
+const fs = require("fs");
+const multer = require("multer");
 const User = require("../models/User");
 const Tournament = require("../models/Tournament");
 const { verifyToken, requireAdmin } = require("../middleware/auth");
+
+const avatarStorage = multer.diskStorage({
+  destination: path.join(__dirname, "../uploads/avatars"),
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    cb(null, `avatar-${req.user.id}-${Date.now()}${ext}`);
+  }
+});
+const uploadAvatar = multer({
+  storage: avatarStorage,
+  fileFilter: (req, file, cb) => {
+    const allowed = ["image/jpeg", "image/png", "image/webp"];
+    allowed.includes(file.mimetype) ? cb(null, true) : cb(new Error("Only JPEG, PNG and WebP allowed"), false);
+  },
+  limits: { fileSize: 3 * 1024 * 1024 }
+});
 
 const router = express.Router();
 const ALLOWED_SPORTS = ["football", "basketball", "tennis", "handball", "volleyball", "padel"];
@@ -111,6 +130,29 @@ router.put("/me", verifyToken, async (req, res) => {
       return res.status(400).json({ error: "Duplicate value" });
     }
     res.status(500).json({ error: "Failed to update profile" });
+  }
+});
+
+router.post("/me/avatar", verifyToken, uploadAvatar.single("avatar"), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ error: "No file uploaded" });
+
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    // Delete old avatar file if it exists
+    if (user.avatar) {
+      const oldPath = path.join(__dirname, "../", user.avatar);
+      if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
+    }
+
+    const avatarPath = `/uploads/avatars/${req.file.filename}`;
+    user.avatar = avatarPath;
+    await user.save();
+
+    res.json({ avatar: avatarPath });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to upload avatar" });
   }
 });
 

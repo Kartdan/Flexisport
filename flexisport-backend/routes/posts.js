@@ -64,10 +64,18 @@ router.put("/:id", async (req, res) => {
   }
 });
 
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", verifyToken, async (req, res) => {
   try {
-    const deletedPost = await Post.findByIdAndDelete(req.params.id);
-    if (!deletedPost) return res.status(404).json({ error: "Post not found" });
+    const post = await Post.findById(req.params.id);
+    if (!post) return res.status(404).json({ error: "Post not found" });
+
+    const isAdminOrSupervisor = req.user.role === "admin" || req.user.role === "supervisor";
+    const isAuthor = post.authorRef?.toString() === req.user.id;
+    if (!isAdminOrSupervisor && !isAuthor) {
+      return res.status(403).json({ error: "Not authorized to delete this post" });
+    }
+
+    await Post.findByIdAndDelete(req.params.id);
     res.json({ message: "✅ Post deleted" });
   } catch (err) {
     console.error("❌ Error deleting post:", err);

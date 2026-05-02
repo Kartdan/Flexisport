@@ -1,0 +1,171 @@
+<div class="analytics-page">
+  <div class="analytics-header">
+    <h2>Platform Analytics</h2>
+    <button class="refresh-btn" (click)="loadAnalytics()" [disabled]="loading">
+      {{ loading ? 'Loading…' : '↻ Refresh' }}
+    </button>
+  </div>
+
+  <div *ngIf="errorMessage" class="alert-error">{{ errorMessage }}</div>
+
+  <ng-container *ngIf="!loading && data">
+
+    <!-- KPI Cards -->
+    <section class="kpi-grid">
+      <div class="kpi-card kpi-users">
+        <div class="kpi-icon">👤</div>
+        <div class="kpi-body">
+          <div class="kpi-value">{{ data.totals.users }}</div>
+          <div class="kpi-label">Total Users</div>
+        </div>
+      </div>
+      <div class="kpi-card kpi-courts">
+        <div class="kpi-icon">🏟️</div>
+        <div class="kpi-body">
+          <div class="kpi-value">{{ data.totals.courts.accepted }}</div>
+          <div class="kpi-label">Active Courts</div>
+          <div class="kpi-sub">{{ data.totals.courts.pending }} suspended · {{ data.totals.courts.rejected }} rejected</div>
+        </div>
+      </div>
+      <div class="kpi-card kpi-bookings">
+        <div class="kpi-icon">📅</div>
+        <div class="kpi-body">
+          <div class="kpi-value">{{ data.totals.bookings.active }}</div>
+          <div class="kpi-label">Active Bookings</div>
+          <div class="kpi-sub">{{ cancellationRate }}% cancellation rate</div>
+        </div>
+      </div>
+      <div class="kpi-card kpi-revenue">
+        <div class="kpi-icon">💰</div>
+        <div class="kpi-body">
+          <div class="kpi-value">{{ data.totals.revenue | number }} RON</div>
+          <div class="kpi-label">Estimated Revenue</div>
+          <div class="kpi-sub">From active bookings</div>
+        </div>
+      </div>
+      <div class="kpi-card kpi-tournaments">
+        <div class="kpi-icon">🏆</div>
+        <div class="kpi-body">
+          <div class="kpi-value">{{ data.totals.tournaments }}</div>
+          <div class="kpi-label">Tournaments</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Monthly Trends -->
+    <section class="charts-row">
+      <!-- Bookings chart -->
+      <div class="chart-card">
+        <h3>Monthly Bookings <span class="chart-subtitle">(last 6 months)</span></h3>
+        <div class="bar-chart">
+          <div class="bar-group" *ngFor="let m of data.monthlyStats">
+            <div class="bar-wrap">
+              <span class="bar-value">{{ m.bookings }}</span>
+              <div class="bar" [style.height]="chartBarHeight(m.bookings, maxMonthlyBookings)"></div>
+            </div>
+            <div class="bar-label">{{ formatMonth(m.month) }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Revenue chart -->
+      <div class="chart-card">
+        <h3>Monthly Revenue <span class="chart-subtitle">(RON, last 6 months)</span></h3>
+        <div class="bar-chart revenue-chart">
+          <div class="bar-group" *ngFor="let m of data.monthlyStats">
+            <div class="bar-wrap">
+              <span class="bar-value">{{ m.revenue }}</span>
+              <div class="bar bar-revenue" [style.height]="chartBarHeight(m.revenue, maxMonthlyRevenue)"></div>
+            </div>
+            <div class="bar-label">{{ formatMonth(m.month) }}</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Users by Role & Court Status -->
+    <section class="info-row">
+      <div class="info-card">
+        <h3>Users by Role</h3>
+        <ul class="role-list">
+          <li>
+            <span class="role-badge badge-player">Player</span>
+            <span class="role-count">{{ data.usersByRole.player }}</span>
+          </li>
+          <li>
+            <span class="role-badge badge-owner">Owner</span>
+            <span class="role-count">{{ data.usersByRole.owner }}</span>
+          </li>
+          <li>
+            <span class="role-badge badge-supervisor">Supervisor</span>
+            <span class="role-count">{{ data.usersByRole.supervisor }}</span>
+          </li>
+          <li>
+            <span class="role-badge badge-admin">Admin</span>
+            <span class="role-count">{{ data.usersByRole.admin }}</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="info-card">
+        <h3>Court Status Breakdown</h3>
+        <ul class="role-list">
+          <li>
+            <span class="role-badge badge-accepted">Accepted</span>
+            <span class="role-count">{{ data.totals.courts.accepted }}</span>
+          </li>
+          <li>
+            <span class="role-badge badge-pending">Suspended</span>
+            <span class="role-count">{{ data.totals.courts.pending }}</span>
+          </li>
+          <li>
+            <span class="role-badge badge-rejected">Rejected</span>
+            <span class="role-count">{{ data.totals.courts.rejected }}</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="info-card">
+        <h3>Booking Status</h3>
+        <ul class="role-list">
+          <li>
+            <span class="role-badge badge-accepted">Active</span>
+            <span class="role-count">{{ data.totals.bookings.active }}</span>
+          </li>
+          <li>
+            <span class="role-badge badge-rejected">Cancelled</span>
+            <span class="role-count">{{ data.totals.bookings.cancelled }}</span>
+          </li>
+          <li>
+            <span class="role-badge badge-total">Total</span>
+            <span class="role-count">{{ data.totals.bookings.total }}</span>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Top Courts Table -->
+    <section class="top-courts-card" *ngIf="data.topCourts.length > 0">
+      <h3>Top Courts by Bookings</h3>
+      <table class="top-courts-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Court Name</th>
+            <th>Address</th>
+            <th>Active Bookings</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let court of data.topCourts; let i = index">
+            <td class="rank">{{ i + 1 }}</td>
+            <td>{{ court.name }}</td>
+            <td class="address">{{ court.address }}</td>
+            <td class="bookings-count">{{ court.bookings }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+  </ng-container>
+</div>

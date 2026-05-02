@@ -134,6 +134,10 @@ export class NavComponent implements OnInit, OnDestroy, DoCheck {
     return this.authService.getUserRole() === 'owner';
   }
 
+  public get isSupervisor() {
+    return this.authService.getUserRole() === 'supervisor';
+  }
+
   public get currentUsername(): string {
     return this.authService.getStoredUser()?.username || '';
   }

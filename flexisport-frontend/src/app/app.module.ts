@@ -29,6 +29,11 @@ import { ProfileComponent } from './components/profile/profile.component';
 import { MyBookingsComponent } from './components/my-bookings/my-bookings.component';
 import { CourtBookersComponent } from './components/court-bookers/court-bookers.component';
 import { AdminUserManagementComponent } from './components/admin-user-management/admin-user-management.component';
+import { AdminAnalyticsComponent } from './components/admin-analytics/admin-analytics.component';
+import { ContactComponent } from './components/contact/contact.component';
+import { AdminContactInboxComponent } from './components/admin-contact-inbox/admin-contact-inbox.component';
+import { SupervisorInboxComponent } from './components/supervisor-inbox/supervisor-inbox.component';
+import { SupervisorDashboardComponent } from './components/supervisor-dashboard/supervisor-dashboard.component';
 
 @NgModule({
   declarations: [
@@ -54,7 +59,12 @@ import { AdminUserManagementComponent } from './components/admin-user-management
     ProfileComponent,
     MyBookingsComponent,
     CourtBookersComponent,
-    AdminUserManagementComponent
+    AdminUserManagementComponent,
+    AdminAnalyticsComponent,
+    ContactComponent,
+    AdminContactInboxComponent,
+    SupervisorInboxComponent,
+    SupervisorDashboardComponent
   ],
   imports: [
     BrowserModule,

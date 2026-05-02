@@ -5,19 +5,94 @@
   </div>
 
   <div class="filter-section">
-    <div class="filter-group">
-      <label for="sport-filter">Filter by sport:</label>
-      <select
-        id="sport-filter"
-        [(ngModel)]="selectedSport"
-        (change)="onSportChange()"
-        class="sport-select"
-      >
-        <option value="">All Sports</option>
-        <option *ngFor="let sport of sports" [value]="sport.slug">
-          {{ sport.emoji }} {{ sport.name }}
-        </option>
-      </select>
+    <!-- Primary filter bar -->
+    <div class="filter-bar">
+      <div class="filter-group">
+        <label for="sport-filter">Sport</label>
+        <select id="sport-filter" [(ngModel)]="selectedSport" (change)="onFilterChange()" class="filter-select">
+          <option value="">All Sports</option>
+          <option *ngFor="let sport of sports" [value]="sport.slug">{{ sport.emoji }} {{ sport.name }}</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="city-filter">City / Area</label>
+        <input
+          id="city-filter"
+          type="text"
+          [(ngModel)]="citySearch"
+          (input)="onFilterChange()"
+          placeholder="e.g. Bucharest"
+          class="filter-input"
+        />
+      </div>
+
+      <div class="filter-group">
+        <label for="sort-filter">Sort by</label>
+        <select id="sort-filter" [(ngModel)]="sortBy" (change)="onClientFilterChange()" class="filter-select">
+          <option value="default">Default</option>
+          <option value="price-asc">Price: Low → High</option>
+          <option value="price-desc">Price: High → Low</option>
+          <option value="rating-desc">Rating: Best first</option>
+          <option value="name-asc">Name: A → Z</option>
+        </select>
+      </div>
+
+      <button class="advanced-toggle" type="button" (click)="filtersExpanded = !filtersExpanded">
+        {{ filtersExpanded ? '▲ Less filters' : '▼ More filters' }}
+        <span class="filter-badge" *ngIf="activeFilterCount > 0">{{ activeFilterCount }}</span>
+      </button>
+
+      <button class="reset-btn" type="button" *ngIf="activeFilterCount > 0" (click)="resetFilters()">
+        ✕ Reset
+      </button>
+    </div>
+
+    <!-- Advanced filter panel -->
+    <div class="advanced-filters" *ngIf="filtersExpanded">
+      <div class="filter-group">
+        <label for="surface-filter">Surface</label>
+        <select id="surface-filter" [(ngModel)]="selectedSurface" (change)="onFilterChange()" class="filter-select">
+          <option value="">Any Surface</option>
+          <option *ngFor="let s of surfaceOptions" [value]="s.value">{{ s.label }}</option>
+        </select>
+      </div>
+
+      <div class="filter-group price-range">
+        <label>Price / hour (RON)</label>
+        <div class="price-inputs">
+          <input
+            type="number"
+            [(ngModel)]="minPrice"
+            (change)="onFilterChange()"
+            placeholder="Min"
+            min="0"
+            class="filter-input price-input"
+          />
+          <span class="price-sep">–</span>
+          <input
+            type="number"
+            [(ngModel)]="maxPrice"
+            (change)="onFilterChange()"
+            placeholder="Max"
+            min="0"
+            class="filter-input price-input"
+          />
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <label>Min rating: <strong>{{ minRating > 0 ? minRating + '★' : 'Any' }}</strong></label>
+        <div class="rating-stars">
+          <button
+            *ngFor="let star of [1,2,3,4,5]"
+            type="button"
+            class="star-btn"
+            [class.active]="star <= minRating"
+            (click)="minRating = (minRating === star ? 0 : star); onClientFilterChange()"
+          >★</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -32,11 +107,13 @@
     <div
       class="court-card"
       *ngFor="let court of filteredCourts"
-      (click)="goToCourtDetail(court._id)"
+      [class.court-card--pending]="court.status === 'pending'"
+      (click)="goToCourtDetail(court)"
     >
       <div class="court-header">
         <h3>{{ court.name }}</h3>
-        <span [ngClass]="getStatusBadgeClass(court.operationalStatus)" class="status-badge">
+        <span *ngIf="court.status === 'pending'" class="status-badge badge-approval-pending">⏳ Suspended</span>
+        <span *ngIf="court.status !== 'pending'" [ngClass]="getStatusBadgeClass(court.operationalStatus)" class="status-badge">
           {{ getStatusLabel(court.operationalStatus) }}
         </span>
       </div>
@@ -83,8 +160,9 @@
       </div>
 
       <div class="court-footer">
-        <button class="book-btn" *ngIf="authService.isLoggedIn() && court.operationalStatus === 'open'" (click)="openBookingModal($event, court)">Book Now</button>
-        <button class="book-btn" *ngIf="!authService.isLoggedIn()" [routerLink]="['/login']">Book Now</button>
+        <button class="book-btn" *ngIf="authService.isLoggedIn() && court.operationalStatus === 'open' && court.status !== 'pending'" (click)="openBookingModal($event, court)">Book Now</button>
+        <button class="book-btn" *ngIf="!authService.isLoggedIn() && court.status !== 'pending'" [routerLink]="['/login']">Book Now</button>
+        <span *ngIf="court.status === 'pending'" class="pending-notice">Not yet available</span>
       </div>
     </div>
   </div>
