@@ -58,6 +58,11 @@ const courtSchema = new mongoose.Schema({
     default: "open"
   },
 
+  suspended: {
+    type: Boolean,
+    default: false
+  },
+
   schedules: [
     {
       day: { 

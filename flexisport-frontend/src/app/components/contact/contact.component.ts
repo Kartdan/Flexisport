@@ -17,6 +17,7 @@ export class ContactComponent implements OnInit {
   form: FormGroup;
   sending = false;
   sent = false;
+  sentToName = '';
   errorMessage = '';
 
   constructor(
@@ -63,6 +64,7 @@ export class ContactComponent implements OnInit {
     }
     this.sending = true;
     this.errorMessage = '';
+    this.sentToName = this.selectedSupervisor.fullName;
     const payload = { ...this.form.value, recipientId: this.selectedSupervisor._id };
     this.contactService.sendMessage(payload).subscribe({
       next: () => { this.sent = true; this.sending = false; this.cdr.detectChanges(); },

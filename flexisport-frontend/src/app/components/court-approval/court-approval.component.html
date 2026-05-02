@@ -30,8 +30,9 @@
           <td>{{ court.pricePerHour }} RON/h</td>
           <td>
             <span [class]="'status-badge status-' + court.status">
-              {{ court.status === 'pending' ? 'Suspended' : court.status }}
+              {{ court.status }}
             </span>
+            <span *ngIf="court.suspended" class="status-badge badge-suspended" style="margin-left:4px">🚫 Suspended</span>
           </td>
           <td class="actions">
             <button
@@ -47,10 +48,12 @@
               Reject
             </button>
             <button
-              class="btn btn-pending"
-              [disabled]="court.status === CourtStatus.PENDING"
-              (click)="updateStatus(court, CourtStatus.PENDING)">
-              Suspend
+              class="btn"
+              [class.btn-pending]="!court.suspended"
+              [class.btn-accept]="court.suspended"
+              [disabled]="court.status !== CourtStatus.ACCEPTED"
+              (click)="toggleSuspend(court)">
+              {{ court.suspended ? 'Reinstate' : 'Suspend' }}
             </button>
             <button class="btn btn-bookings" (click)="toggleCourtBookings(court)">
               {{ expandedBookingsCourtId === court._id ? 'Hide Bookings' : 'View Bookings' }}

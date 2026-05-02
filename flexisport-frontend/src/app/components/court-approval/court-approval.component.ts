@@ -91,6 +91,28 @@ export class CourtApprovalComponent implements OnInit {
     });
   }
 
+  toggleSuspend(court: Court): void {
+    this.courtService.toggleCourtSuspension(court._id!).subscribe({
+      next: (updated) => {
+        const index = this.courts.findIndex(c => c._id === updated._id);
+        if (index !== -1) {
+          const list = [...this.courts];
+          list[index] = updated;
+          this.courts = list;
+        }
+        this.successMessage = updated.suspended
+          ? `"${court.name}" has been suspended.`
+          : `"${court.name}" has been reinstated.`;
+        this.cdr.detectChanges();
+        setTimeout(() => { this.successMessage = ''; this.cdr.detectChanges(); }, 3000);
+      },
+      error: () => {
+        this.errorMessage = 'Failed to toggle suspension.';
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
   getBookingUser(booking: Booking): string {
     if (typeof booking.user === 'string') return booking.user;
     return booking.user.fullName || booking.user.username;
