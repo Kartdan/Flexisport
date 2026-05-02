@@ -145,6 +145,6 @@ export class AuthService {
   getAvatarUrl(avatar?: string): string {
     if (!avatar) return '';
     if (avatar.startsWith('http') || avatar.startsWith('data:')) return avatar;
-    return `/uploads${avatar}`;
+    return avatar;
   }
 }

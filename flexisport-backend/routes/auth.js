@@ -2,11 +2,20 @@ const express = require("express");
 const router = express.Router();
 const User = require("../models/User");
 const Notification = require("../models/Notification");
+const rateLimit = require("express-rate-limit");
 
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 
-router.post("/register", async (req, res) => {
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many attempts. Please try again in 15 minutes." }
+});
+
+router.post("/register", authLimiter, async (req, res) => {
   try {
     const { fullName, username, email, password, role } = req.body;
 
@@ -52,7 +61,7 @@ router.post("/register", async (req, res) => {
   }
 });
 
-router.post("/login", async (req, res) => {
+router.post("/login", authLimiter, async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -81,7 +90,7 @@ router.post("/login", async (req, res) => {
 
     const token = jwt.sign(
       { id: user._id, role: user.role },
-      process.env.JWT_SECRET || "secret_cheie_temporara",
+      process.env.JWT_SECRET,
       { expiresIn: "1d" }
     );
 
@@ -90,8 +99,11 @@ router.post("/login", async (req, res) => {
       user: {
         id: user._id,
         fullName: user.fullName,
+        username: user.username,
         email: user.email,
-        role: user.role
+        role: user.role,
+        supervisorStatus: user.supervisorStatus || null,
+        avatar: user.avatar || null
       }
     });
   } catch (err) {

@@ -156,7 +156,7 @@ router.post("/me/avatar", verifyToken, uploadAvatar.single("avatar"), async (req
   }
 });
 
-router.get("/", async (req, res) => {
+router.get("/", verifyToken, requireAdmin, async (req, res) => {
   try {
     const users = await User.find({}, { password: 0 });
     res.json(users);
