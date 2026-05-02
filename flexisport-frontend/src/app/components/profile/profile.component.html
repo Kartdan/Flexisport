@@ -15,78 +15,117 @@
   <div *ngIf="errorMessage" class="alert alert-error">{{ errorMessage }}</div>
   <div *ngIf="successMessage" class="alert alert-success">{{ successMessage }}</div>
 
-  <form class="profile-card" *ngIf="!loading" [formGroup]="profileForm" (ngSubmit)="saveProfile()">
-    <div class="form-group">
-      <label for="fullName">Full Name</label>
-      <input id="fullName" type="text" formControlName="fullName" />
-      <small *ngIf="profileForm.get('fullName')?.touched && profileForm.get('fullName')?.invalid">
-        Please enter at least 2 characters.
-      </small>
-    </div>
+  <ng-container *ngIf="!loading">
 
-    <div class="form-group">
-      <label for="username">Username</label>
-      <input id="username" type="text" formControlName="username" />
-      <small *ngIf="profileForm.get('username')?.touched && profileForm.get('username')?.invalid">
-        Username must be at least 3 characters.
-      </small>
-    </div>
-
-    <div class="form-group">
-      <label for="email">Email</label>
-      <input id="email" type="email" formControlName="email" />
-      <small *ngIf="profileForm.get('email')?.touched && profileForm.get('email')?.invalid">
-        Enter a valid email address.
-      </small>
-    </div>
-
-    <div class="form-group">
-      <label for="role">Role</label>
-      <input id="role" type="text" formControlName="role" [attr.disabled]="true" />
-    </div>
-
-    <div class="form-group">
-      <label>Preferred Sports</label>
-      <div class="checkbox-group" *ngIf="sports.length > 0">
-        <label class="checkbox-label" *ngFor="let sport of sports">
-          <input
-            type="checkbox"
-            [checked]="isSportSelected(sport.slug)"
-            (change)="togglePreferredSport(sport.slug, $event)"
-          />
-          {{ sport.emoji }} {{ sport.name }}
-        </label>
+    <!-- Profile completeness banner -->
+    <div class="completeness-card" *ngIf="completenessPercent < 100">
+      <div class="completeness-top">
+        <span class="completeness-label">Profile completeness: <strong>{{ completenessPercent }}%</strong></span>
+        <span class="completeness-missing" *ngIf="completenessMissing.length">
+          Missing: {{ completenessMissing.join(' · ') }}
+        </span>
+      </div>
+      <div class="completeness-bar-track">
+        <div class="completeness-bar-fill" [style.width.%]="completenessPercent"></div>
       </div>
     </div>
 
-    <div class="form-group" *ngIf="sports.length > 0">
-      <label>Games played by sport</label>
-      <div class="games-grid">
-        <div class="games-item" *ngFor="let sport of sports">
-          <label>{{ sport.emoji }} {{ sport.name }}</label>
-          <div class="games-value">{{ getGamesForSport(sport.slug) }}</div>
+    <form class="profile-card" [formGroup]="profileForm" (ngSubmit)="saveProfile()">
+
+      <!-- Avatar section -->
+      <div class="avatar-section">
+        <div class="avatar-wrap">
+          <img *ngIf="avatarPreview" [src]="avatarPreview" class="avatar-img" alt="Profile picture" />
+          <div *ngIf="!avatarPreview" class="avatar-placeholder">
+            {{ (profileForm.get('fullName')?.value || '?')[0]?.toUpperCase() }}
+          </div>
+          <label class="avatar-edit-btn" title="Change picture">
+            📷
+            <input type="file" accept="image/jpeg,image/png,image/webp" (change)="onAvatarFileChange($event)" hidden />
+          </label>
+        </div>
+        <div class="avatar-info">
+          <span class="avatar-uploading" *ngIf="avatarUploading">Uploading…</span>
+          <span class="avatar-error" *ngIf="avatarError">{{ avatarError }}</span>
+          <span class="avatar-hint" *ngIf="!avatarUploading && !avatarError">JPG, PNG or WebP · max 3 MB</span>
         </div>
       </div>
-    </div>
 
-    <div class="form-group">
-      <label for="personalDescription">Personal Description</label>
-      <textarea
-        id="personalDescription"
-        formControlName="personalDescription"
-        rows="4"
-        maxlength="1000"
-        placeholder="Tell others a bit about your playing style, goals, or experience..."
-      ></textarea>
-      <small *ngIf="profileForm.get('personalDescription')?.touched && profileForm.get('personalDescription')?.invalid">
-        Description must be at most 1000 characters.
-      </small>
-    </div>
+      <div class="form-group">
+        <label for="fullName">Full Name</label>
+        <input id="fullName" type="text" formControlName="fullName" />
+        <small *ngIf="profileForm.get('fullName')?.touched && profileForm.get('fullName')?.invalid">
+          Please enter at least 2 characters.
+        </small>
+      </div>
 
-    <div class="form-actions">
-      <button type="submit" class="btn btn-primary" [disabled]="saving || profileForm.invalid">
-        {{ saving ? 'Saving...' : 'Save Changes' }}
-      </button>
-    </div>
-  </form>
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input id="username" type="text" formControlName="username" />
+        <small *ngIf="profileForm.get('username')?.touched && profileForm.get('username')?.invalid">
+          Username must be at least 3 characters.
+        </small>
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input id="email" type="email" formControlName="email" />
+        <small *ngIf="profileForm.get('email')?.touched && profileForm.get('email')?.invalid">
+          Enter a valid email address.
+        </small>
+      </div>
+
+      <div class="form-group">
+        <label for="role">Role</label>
+        <input id="role" type="text" formControlName="role" [attr.disabled]="true" />
+      </div>
+
+      <div class="form-group">
+        <label>Preferred Sports</label>
+        <div class="checkbox-group" *ngIf="sports.length > 0">
+          <label class="checkbox-label" *ngFor="let sport of sports">
+            <input
+              type="checkbox"
+              [checked]="isSportSelected(sport.slug)"
+              (change)="togglePreferredSport(sport.slug, $event)"
+            />
+            {{ sport.emoji }} {{ sport.name }}
+          </label>
+        </div>
+      </div>
+
+      <div class="form-group" *ngIf="sports.length > 0">
+        <label>Games played by sport</label>
+        <div class="games-grid">
+          <div class="games-item" *ngFor="let sport of sports">
+            <label>{{ sport.emoji }} {{ sport.name }}</label>
+            <div class="games-value">{{ getGamesForSport(sport.slug) }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="personalDescription">Bio</label>
+        <textarea
+          id="personalDescription"
+          formControlName="personalDescription"
+          rows="4"
+          maxlength="1000"
+          placeholder="Tell others about your playing style, experience, or goals…"
+        ></textarea>
+        <div class="char-count">
+          {{ (profileForm.get('personalDescription')?.value || '').length }} / 1000
+        </div>
+        <small *ngIf="profileForm.get('personalDescription')?.touched && profileForm.get('personalDescription')?.invalid">
+          Description must be at most 1000 characters.
+        </small>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary" [disabled]="saving || profileForm.invalid">
+          {{ saving ? 'Saving...' : 'Save Changes' }}
+        </button>
+      </div>
+    </form>
+  </ng-container>
 </div>

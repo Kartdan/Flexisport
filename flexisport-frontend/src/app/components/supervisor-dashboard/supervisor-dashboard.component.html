@@ -1,0 +1,49 @@
+<div class="dashboard-page">
+  <h2>Supervisor Dashboard</h2>
+
+  <div *ngIf="loading" class="loading">Loading stats…</div>
+  <div *ngIf="errorMessage" class="alert-error">{{ errorMessage }}</div>
+
+  <div class="kpi-grid" *ngIf="!loading && stats">
+    <div class="kpi-card clickable" (click)="goTo('/admin/courts')">
+      <div class="kpi-value">{{ stats.pendingCourts }}</div>
+      <div class="kpi-label">Pending Courts</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-value">{{ stats.activeCourts }}</div>
+      <div class="kpi-label">Active Courts</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-value">{{ stats.publishedTournaments }}</div>
+      <div class="kpi-label">Published Tournaments</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-value">{{ stats.pendingTournaments }}</div>
+      <div class="kpi-label">Pending Tournaments</div>
+    </div>
+    <div class="kpi-card clickable" (click)="goTo('/supervisor/inbox')">
+      <div class="kpi-value">{{ stats.unreadMessages }}</div>
+      <div class="kpi-label">Unread Messages</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-value">{{ stats.totalMessages }}</div>
+      <div class="kpi-label">Total Messages</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-value">{{ stats.totalPosts }}</div>
+      <div class="kpi-label">Feed Posts</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-value">{{ stats.totalPlayers }}</div>
+      <div class="kpi-label">Registered Players</div>
+    </div>
+  </div>
+
+  <div class="quick-links" *ngIf="!loading && stats">
+    <h3>Quick Actions</h3>
+    <button class="btn-action" (click)="goTo('/admin/courts')">Court Approvals</button>
+    <button class="btn-action" (click)="goTo('/supervisor/inbox')">My Inbox</button>
+    <button class="btn-action" (click)="goTo('/tournaments')">Tournaments</button>
+    <button class="btn-action" (click)="goTo('/feed')">Community Feed</button>
+  </div>
+</div>

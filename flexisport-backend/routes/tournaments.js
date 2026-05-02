@@ -412,6 +412,51 @@ router.patch("/:id/questions/:questionId/answers/:answerId", verifyToken, async 
   }
 });
 
+// DELETE /:id/questions/:questionId  — admin or supervisor can delete any question
+router.delete("/:id/questions/:questionId", verifyToken, async (req, res) => {
+  try {
+    if (req.user.role !== "admin" && req.user.role !== "supervisor") {
+      return res.status(403).json({ error: "Only admins or supervisors can delete questions" });
+    }
+    const question = await TournamentQuestion.findOne({
+      _id: req.params.questionId,
+      tournament: req.params.id
+    });
+    if (!question) return res.status(404).json({ error: "Question not found" });
+    await TournamentQuestionAnswer.deleteMany({ question: question._id });
+    await TournamentQuestion.findByIdAndDelete(question._id);
+    res.json({ message: "Question deleted" });
+  } catch (err) {
+    console.error("Error deleting question:", err);
+    res.status(500).json({ error: "Failed to delete question" });
+  }
+});
+
+// DELETE /:id/questions/:questionId/answers/:answerId  — admin or supervisor
+router.delete("/:id/questions/:questionId/answers/:answerId", verifyToken, async (req, res) => {
+  try {
+    if (req.user.role !== "admin" && req.user.role !== "supervisor") {
+      return res.status(403).json({ error: "Only admins or supervisors can delete answers" });
+    }
+    const answer = await TournamentQuestionAnswer.findOne({
+      _id: req.params.answerId,
+      question: req.params.questionId,
+      tournament: req.params.id
+    });
+    if (!answer) return res.status(404).json({ error: "Answer not found" });
+    await TournamentQuestionAnswer.findByIdAndDelete(answer._id);
+    // Reopen question if it had only this answer
+    const remaining = await TournamentQuestionAnswer.countDocuments({ question: req.params.questionId });
+    if (remaining === 0) {
+      await TournamentQuestion.findByIdAndUpdate(req.params.questionId, { status: "open" });
+    }
+    res.json({ message: "Answer deleted" });
+  } catch (err) {
+    console.error("Error deleting answer:", err);
+    res.status(500).json({ error: "Failed to delete answer" });
+  }
+});
+
 router.get("/my/list", verifyToken, async (req, res) => {
   try {
     if (req.user.role !== "owner") {

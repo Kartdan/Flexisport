@@ -11,6 +11,8 @@ export class ErrorPopupComponent implements OnChanges, OnDestroy {
   @Input() title = 'Something went wrong';
   @Input() message = '';
   @Input() autoCloseMs = 0;
+  /** 'error' | 'warning' | 'info' — controls colour scheme */
+  @Input() type: 'error' | 'warning' | 'info' = 'error';
 
   @Output() closed = new EventEmitter<void>();
 

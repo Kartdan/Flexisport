@@ -30,7 +30,7 @@
           <td>{{ court.pricePerHour }} RON/h</td>
           <td>
             <span [class]="'status-badge status-' + court.status">
-              {{ court.status }}
+              {{ court.status === 'pending' ? 'Suspended' : court.status }}
             </span>
           </td>
           <td class="actions">
@@ -50,7 +50,7 @@
               class="btn btn-pending"
               [disabled]="court.status === CourtStatus.PENDING"
               (click)="updateStatus(court, CourtStatus.PENDING)">
-              Set Pending
+              Suspend
             </button>
             <button class="btn btn-bookings" (click)="toggleCourtBookings(court)">
               {{ expandedBookingsCourtId === court._id ? 'Hide Bookings' : 'View Bookings' }}

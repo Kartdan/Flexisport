@@ -23,6 +23,33 @@ export class ProfileComponent implements OnInit {
   userRole = '';
   private loadedProfile: User | null = null;
 
+  // Avatar
+  avatarPreview: string = '';
+  avatarUploading = false;
+  avatarError = '';
+
+  get completenessPercent(): number {
+    if (!this.loadedProfile) return 0;
+    const checks = [
+      !!this.loadedProfile.fullName,
+      !!this.loadedProfile.username,
+      !!this.loadedProfile.email,
+      !!(this.loadedProfile.avatar),
+      !!(this.loadedProfile.personalDescription?.trim()),
+      !!(this.loadedProfile.preferredSports?.length),
+    ];
+    return Math.round((checks.filter(Boolean).length / checks.length) * 100);
+  }
+
+  get completenessMissing(): string[] {
+    if (!this.loadedProfile) return [];
+    const missing: string[] = [];
+    if (!this.loadedProfile.avatar) missing.push('Profile picture');
+    if (!this.loadedProfile.personalDescription?.trim()) missing.push('Bio');
+    if (!this.loadedProfile.preferredSports?.length) missing.push('Preferred sports');
+    return missing;
+  }
+
   constructor(
     private authService: AuthService,
     private sportService: SportService,
@@ -113,6 +140,7 @@ export class ProfileComponent implements OnInit {
   private bindUserToForm(user: User): void {
     this.loadedProfile = user;
     this.userRole = user.role;
+    this.avatarPreview = this.authService.getAvatarUrl(user.avatar);
     this.profileForm.patchValue({
       fullName: user.fullName || '',
       username: user.username || '',
@@ -150,5 +178,34 @@ export class ProfileComponent implements OnInit {
     this.successPopupTitle = title;
     this.successPopupMessage = message;
     this.showSuccessPopup = true;
+  }
+
+  onAvatarFileChange(event: Event): void {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+    this.avatarError = '';
+    // Preview immediately
+    const reader = new FileReader();
+    reader.onload = () => { this.avatarPreview = reader.result as string; this.cdr.detectChanges(); };
+    reader.readAsDataURL(file);
+    // Upload
+    this.avatarUploading = true;
+    this.authService.uploadAvatar(file).subscribe({
+      next: (res) => {
+        if (this.loadedProfile) {
+          this.loadedProfile = { ...this.loadedProfile, avatar: res.avatar };
+          // Sync stored user
+          const stored = this.authService.getStoredUser();
+          if (stored) localStorage.setItem('user', JSON.stringify({ ...stored, avatar: res.avatar }));
+        }
+        this.avatarUploading = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.avatarError = err.error?.error || 'Avatar upload failed.';
+        this.avatarUploading = false;
+        this.cdr.detectChanges();
+      }
+    });
   }
 }

@@ -1,6 +1,12 @@
 <div class="error-overlay" *ngIf="visible" (click)="dismiss()">
-  <div class="error-popup" (click)="$event.stopPropagation()">
-    <div class="error-icon" aria-hidden="true">!</div>
+  <div class="error-popup" [ngClass]="type" (click)="$event.stopPropagation()">
+    <div class="error-icon" aria-hidden="true">
+      <ng-container [ngSwitch]="type">
+        <span *ngSwitchCase="'warning'">⏳</span>
+        <span *ngSwitchCase="'info'">ℹ</span>
+        <span *ngSwitchDefault>!</span>
+      </ng-container>
+    </div>
     <h3>{{ title }}</h3>
     <p>{{ message }}</p>
     <button class="close-btn" type="button" (click)="dismiss()">Close</button>

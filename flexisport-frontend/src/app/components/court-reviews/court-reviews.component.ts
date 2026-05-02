@@ -93,6 +93,11 @@ export class CourtReviewsComponent implements OnInit {
     });
   }
 
+  get canModerateReviews(): boolean {
+    const role = this.authService.getUserRole();
+    return role === 'admin' || role === 'supervisor';
+  }
+
   isOwnReview(review: Review): boolean {
     const user = this.authService.getStoredUser();
     if (!user || !review.author) return false;

@@ -58,7 +58,7 @@
         <span class="review-date">{{ review.createdAt | date:'mediumDate' }}</span>
       </div>
       <p class="review-comment" *ngIf="review.comment">{{ review.comment }}</p>
-      <button *ngIf="isOwnReview(review)" class="btn btn-sm btn-delete" (click)="deleteReview(review)">Delete</button>
+      <button *ngIf="isOwnReview(review) || canModerateReviews" class="btn btn-sm btn-delete" (click)="deleteReview(review)">Delete</button>
     </div>
   </div>
 </div>

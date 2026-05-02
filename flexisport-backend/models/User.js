@@ -34,6 +34,10 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  avatar: {
+    type: String,
+    default: ''
+  },
   createdAt: { type: Date, default: Date.now }
 }, { collection: "users" });
 

@@ -32,6 +32,7 @@
       <p class="post-content">{{ post.content }}</p>
       <div class="post-footer">
         <span class="post-author">by {{ post.authorName }}</span>
+        <button *ngIf="canDeletePost(post)" class="btn-delete-post" (click)="deletePost(post)">🗑 Delete</button>
       </div>
     </div>
   </div>

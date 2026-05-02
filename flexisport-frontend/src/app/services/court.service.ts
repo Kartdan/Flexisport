@@ -8,8 +8,8 @@ import { AuthService } from './auth.service';
   providedIn: 'root'
 })
 export class CourtService {
-  private apiUrl = 'http://localhost:5000/api/courts';
-  private baseUrl = 'http://localhost:5000';
+  private apiUrl = '/api/courts';
+  private baseUrl = '';
 
   constructor(private http: HttpClient, private authService: AuthService) {}
 
@@ -23,8 +23,14 @@ export class CourtService {
     return new HttpHeaders({ Authorization: `Bearer ${this.authService.getToken()}` });
   }
 
-  getAllCourts(sport?: string): Observable<Court[]> {
-    const url = sport ? `${this.apiUrl}?sport=${sport}` : this.apiUrl;
+  getAllCourts(filters?: { sport?: string; surface?: string; minPrice?: number; maxPrice?: number; city?: string }): Observable<Court[]> {
+    const params: string[] = [];
+    if (filters?.sport) params.push(`sport=${encodeURIComponent(filters.sport)}`);
+    if (filters?.surface) params.push(`surface=${encodeURIComponent(filters.surface)}`);
+    if (filters?.minPrice != null) params.push(`minPrice=${filters.minPrice}`);
+    if (filters?.maxPrice != null) params.push(`maxPrice=${filters.maxPrice}`);
+    if (filters?.city) params.push(`city=${encodeURIComponent(filters.city)}`);
+    const url = params.length ? `${this.apiUrl}?${params.join('&')}` : this.apiUrl;
     return this.http.get<Court[]>(url, {
       headers: new HttpHeaders({ 'Cache-Control': 'no-cache' })
     });

@@ -16,24 +16,35 @@ import { ProfileComponent } from './components/profile/profile.component';
 import { MyBookingsComponent } from './components/my-bookings/my-bookings.component';
 import { CourtBookersComponent } from './components/court-bookers/court-bookers.component';
 import { AdminUserManagementComponent } from './components/admin-user-management/admin-user-management.component';
+import { AdminAnalyticsComponent } from './components/admin-analytics/admin-analytics.component';
+import { ContactComponent } from './components/contact/contact.component';
+import { AdminContactInboxComponent } from './components/admin-contact-inbox/admin-contact-inbox.component';
+import { SupervisorInboxComponent } from './components/supervisor-inbox/supervisor-inbox.component';
+import { SupervisorDashboardComponent } from './components/supervisor-dashboard/supervisor-dashboard.component';
+import { authGuard, adminGuard, supervisorOrAdminGuard, ownerGuard } from './guards/auth.guards';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
-  { path: '', redirectTo: '/login', pathMatch: 'full' },
+  { path: '', redirectTo: '/home', pathMatch: 'full' },
   { path: 'signup', component: SignupComponent },
   { path: 'home', component: HomeComponent },
-  { path: 'feed', component: FeedComponent },
-  { path: 'feed/create', component: PostCreateComponent },
+  { path: 'feed', component: FeedComponent, canActivate: [authGuard] },
+  { path: 'feed/create', component: PostCreateComponent, canActivate: [supervisorOrAdminGuard] },
   { path: 'courts', component: CourtsComponent },
   { path: 'courts/:id', component: CourtDetailComponent },
   { path: 'tournaments', component: TournamentsComponent },
   { path: 'tournaments/:id', component: TournamentDetailComponent },
-  { path: 'admin/supervisors', component: SupervisorManagementComponent },
-  { path: 'admin/courts', component: CourtApprovalComponent },
-  { path: 'admin/users', component: AdminUserManagementComponent },
-  { path: 'my-courts', component: CourtManagementComponent },
-  { path: 'my-tournaments', component: TournamentManagementComponent },
-  { path: 'bookings', component: MyBookingsComponent },
-  { path: 'court-bookers', component: CourtBookersComponent },
-  { path: 'profile', component: ProfileComponent },
+  { path: 'admin/supervisors', component: SupervisorManagementComponent, canActivate: [adminGuard] },
+  { path: 'admin/courts', component: CourtApprovalComponent, canActivate: [supervisorOrAdminGuard] },
+  { path: 'admin/users', component: AdminUserManagementComponent, canActivate: [adminGuard] },
+  { path: 'admin/analytics', component: AdminAnalyticsComponent, canActivate: [adminGuard] },
+  { path: 'contact', component: ContactComponent },
+  { path: 'admin/contact', component: AdminContactInboxComponent, canActivate: [adminGuard] },
+  { path: 'supervisor/inbox', component: SupervisorInboxComponent, canActivate: [supervisorOrAdminGuard] },
+  { path: 'supervisor/dashboard', component: SupervisorDashboardComponent, canActivate: [supervisorOrAdminGuard] },
+  { path: 'my-courts', component: CourtManagementComponent, canActivate: [ownerGuard] },
+  { path: 'my-tournaments', component: TournamentManagementComponent, canActivate: [ownerGuard] },
+  { path: 'bookings', component: MyBookingsComponent, canActivate: [authGuard] },
+  { path: 'court-bookers', component: CourtBookersComponent, canActivate: [ownerGuard] },
+  { path: 'profile', component: ProfileComponent, canActivate: [authGuard] },
 ];

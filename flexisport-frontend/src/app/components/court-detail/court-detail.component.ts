@@ -61,6 +61,13 @@ export class CourtDetailComponent implements OnInit {
     this.currentPhotoIndex = 0;
     this.courtService.getCourtById(courtId).subscribe({
       next: (data) => {
+        if (data.status && data.status !== 'accepted') {
+          this.errorMessage = 'This court is not yet available.';
+          this.court = null;
+          this.loading = false;
+          this.cdr.detectChanges();
+          return;
+        }
         this.court = data;
         this.loading = false;
         this.cdr.detectChanges();

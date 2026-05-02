@@ -1,0 +1,198 @@
+.inbox-page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.inbox-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+
+  h2 {
+    margin: 0;
+    font-size: 1.6rem;
+    color: #1a1a1a;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .unread-badge {
+    background: #ef5350;
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 700;
+    border-radius: 12px;
+    padding: 0.2rem 0.6rem;
+  }
+}
+
+.inbox-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+
+  .toggle-unread {
+    font-size: 0.88rem;
+    color: #555;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  .refresh-btn {
+    background: #00d1b2;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 0.45rem 1rem;
+    font-size: 0.85rem;
+    cursor: pointer;
+    &:disabled { opacity: 0.6; cursor: not-allowed; }
+    &:hover:not(:disabled) { background: #00a88d; }
+  }
+}
+
+.loading { color: #888; padding: 0.5rem 0; }
+.empty { color: #aaa; padding: 1rem; text-align: center; }
+
+.alert-error {
+  background: #ffebee;
+  color: #c62828;
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+}
+
+.inbox-layout {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 1rem;
+  align-items: start;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.message-list {
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  overflow: hidden;
+  background: white;
+}
+
+.message-row {
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid #f0f0f0;
+  cursor: pointer;
+  transition: background 0.15s;
+
+  &:last-child { border-bottom: none; }
+  &:hover { background: #f8fafb; }
+  &.active { background: #e8f5e9; }
+
+  &.unread {
+    .msg-from { font-weight: 700; }
+    .msg-subject { font-weight: 700; color: #1a1a1a; }
+    border-left: 3px solid #00d1b2;
+  }
+
+  .msg-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.15rem;
+  }
+
+  .msg-from { font-size: 0.88rem; color: #333; }
+  .msg-date { font-size: 0.75rem; color: #aaa; }
+  .msg-subject { font-size: 0.9rem; color: #444; margin-bottom: 0.15rem; }
+  .msg-preview { font-size: 0.8rem; color: #999; }
+}
+
+.message-detail {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  padding: 1.5rem;
+
+  &.placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+    color: #aaa;
+  }
+
+  .detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #f0f0f0;
+
+    h3 { margin: 0 0 0.25rem; font-size: 1.1rem; color: #1a1a1a; }
+
+    .detail-from {
+      margin: 0 0 0.2rem;
+      font-size: 0.88rem;
+      color: #555;
+
+      a { color: #00a88d; text-decoration: none; &:hover { text-decoration: underline; } }
+    }
+
+    .detail-date { margin: 0; font-size: 0.8rem; color: #aaa; }
+  }
+
+  .detail-btns {
+    display: flex;
+    gap: 0.4rem;
+    flex-shrink: 0;
+  }
+
+  .btn-icon {
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.15s;
+
+    &:hover { background: #f5f5f5; }
+  }
+
+  .detail-body {
+    font-size: 0.93rem;
+    color: #333;
+    line-height: 1.65;
+    white-space: pre-wrap;
+    margin-bottom: 1.25rem;
+  }
+
+  .reply-link {
+    display: inline-block;
+    background: #00d1b2;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    padding: 0.5rem 1.1rem;
+    font-size: 0.88rem;
+    font-weight: 600;
+    transition: background 0.2s;
+
+    &:hover { background: #00a88d; }
+  }
+}

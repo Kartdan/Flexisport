@@ -58,6 +58,7 @@ export interface User {
   gamesPlayedBySport?: { [sport: string]: number };
   personalDescription?: string;
   suspended?: boolean;
+  avatar?: string;
   createdAt?: Date;
 }
 
@@ -190,7 +191,7 @@ export interface PostDialogData {
 export interface NotificationItem {
   _id?: string;
   user: string;
-  type: 'tournament_question' | 'tournament_answer' | 'court_status' | 'tournament_publication_status' | 'tournament_details_updated';
+  type: 'tournament_question' | 'tournament_answer' | 'court_status' | 'tournament_publication_status' | 'tournament_details_updated' | 'booking_created' | 'booking_cancelled' | 'user_flagged' | 'user_unflagged' | 'booking_access_restored' | 'supervisor_registered';
   title: string;
   message: string;
   court?: Court | string;

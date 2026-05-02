@@ -9,7 +9,7 @@ const notificationSchema = new mongoose.Schema({
   type: {
     type: String,
     required: true,
-    enum: ["tournament_question", "tournament_answer", "court_status", "tournament_publication_status", "tournament_details_updated", "booking_created", "booking_cancelled", "user_flagged", "user_unflagged", "booking_access_restored"]
+    enum: ["tournament_question", "tournament_answer", "court_status", "tournament_publication_status", "tournament_details_updated", "booking_created", "booking_cancelled", "user_flagged", "user_unflagged", "booking_access_restored", "supervisor_registered"]
   },
   title: {
     type: String,

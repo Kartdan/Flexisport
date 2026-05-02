@@ -6,7 +6,7 @@ const Court = require("../models/Court");
 const Review = require("../models/Review");
 const Notification = require("../models/Notification");
 const BlockedSlot = require("../models/BlockedSlot");
-const { verifyToken, requireAdmin } = require("../middleware/auth");
+const { verifyToken, requireAdmin, requireSupervisorOrAdmin } = require("../middleware/auth");
 
 const courtStorage = multer.diskStorage({
   destination: path.join(__dirname, "../uploads/courts"),
@@ -31,8 +31,17 @@ router.get("/", async (req, res) => {
     res.set("Cache-Control", "no-store, no-cache, must-revalidate");
     res.set("Pragma", "no-cache");
     res.set("Expires", "0");
-    const filter = { status: "accepted" };
+    const filter = { status: { $in: ["accepted", "pending"] } };
     if (req.query.sport) filter.sportCategories = req.query.sport;
+    if (req.query.surface) filter.surfaceType = req.query.surface;
+    if (req.query.minPrice || req.query.maxPrice) {
+      filter.pricePerHour = {};
+      if (req.query.minPrice) filter.pricePerHour.$gte = Number(req.query.minPrice);
+      if (req.query.maxPrice) filter.pricePerHour.$lte = Number(req.query.maxPrice);
+    }
+    if (req.query.city) {
+      filter.address = { $regex: req.query.city, $options: "i" };
+    }
     const courts = await Court.find(filter).populate("author", "username email fullName");
 
     const courtIds = courts.map((court) => court._id);
@@ -85,7 +94,7 @@ router.get("/mine/list", verifyToken, async (req, res) => {
   }
 });
 
-router.get("/admin/list", verifyToken, requireAdmin, async (req, res) => {
+router.get("/admin/list", verifyToken, requireSupervisorOrAdmin, async (req, res) => {
   try {
     const courts = await Court.find().populate("author", "username email fullName");
     res.json(courts);
@@ -94,7 +103,7 @@ router.get("/admin/list", verifyToken, requireAdmin, async (req, res) => {
   }
 });
 
-router.patch("/admin/:id/status", verifyToken, requireAdmin, async (req, res) => {
+router.patch("/admin/:id/status", verifyToken, requireSupervisorOrAdmin, async (req, res) => {
   try {
     const { status } = req.body;
     if (!["pending", "accepted", "rejected"].includes(status)) {

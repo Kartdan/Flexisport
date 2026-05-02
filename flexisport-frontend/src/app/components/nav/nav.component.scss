@@ -167,6 +167,17 @@
       font-size: 0.85rem;
       line-height: 1.35;
     }
+
+    .notif-action-link {
+      display: inline-block;
+      margin-top: 0.3rem;
+      font-size: 0.8rem;
+      color: #00a88d;
+      text-decoration: none;
+      font-weight: 600;
+
+      &:hover { text-decoration: underline; }
+    }
   }
 
   .mark-read {
